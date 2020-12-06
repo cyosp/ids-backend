@@ -37,8 +37,11 @@ public class IdsConfiguration {
 
     public String getAbsoluteImagesDirectory() {
         String imagesDirectory = tomlParseResult.getString("images.directory");
-        if (!imagesDirectory.startsWith(separator))
-            imagesDirectory = getProperty("user.dir") + separator + imagesDirectory;
+        if (!imagesDirectory.startsWith(separator)) {
+            String userDir = getProperty("user.dir");
+            if (!userDir.endsWith(separator)) userDir += separator;
+            imagesDirectory = userDir + imagesDirectory;
+        }
         return imagesDirectory;
     }
 }
