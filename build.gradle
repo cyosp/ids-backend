@@ -4,6 +4,7 @@ buildscript {
     }
     ext {
         springBootVersion = "2.3.1.RELEASE"
+        idsBackendVersion = "0.0.0"
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
@@ -15,9 +16,10 @@ plugins {
     id 'java-library-distribution'
     id "org.springframework.boot" version "${springBootVersion}"
     id "io.spring.dependency-management" version "1.0.9.RELEASE"
+    id 'com.palantir.docker' version "0.25.0"
 }
 
-version = "0.0.0"
+version = "${idsBackendVersion}"
 sourceCompatibility = "1.11"
 
 repositories {
@@ -65,4 +67,9 @@ test {
 
 jar {
     enabled = true
+}
+
+docker {
+    name "cyosp/${rootProject.name}:${idsBackendVersion}"
+    copySpec.from("build/libs").into("build/libs")
 }
