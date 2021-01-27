@@ -86,3 +86,6 @@ jobs:
 
       - name: Push Docker image
         run: ./gradlew dockerPush
+
+      - name: Remove Docker configuration file
+        run: rm ~/.docker/config.json
