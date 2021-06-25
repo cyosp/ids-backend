@@ -197,7 +197,18 @@ public class GraphQLDataFetchers {
     }
 
     BufferedImage createPreview(BufferedImage bufferedImage) {
-        return resize(bufferedImage, bufferedImage.getHeight() > bufferedImage.getWidth() ? 1080 : 1280);
+        int previewImageWidth;
+        int previewImageHeight;
+        final int previewMaximumSize = 1080;
+        final float previewImageRatio = (float) bufferedImage.getWidth() / bufferedImage.getHeight();
+        if (bufferedImage.getWidth() >= bufferedImage.getHeight()) {
+            previewImageWidth = previewMaximumSize;
+            previewImageHeight = (int) (previewImageWidth * previewImageRatio);
+        } else {
+            previewImageHeight = previewMaximumSize;
+            previewImageWidth = (int) (previewImageHeight * previewImageRatio);
+        }
+        return resize(bufferedImage, previewImageWidth, previewImageHeight);
     }
 
     BufferedImage createThumbnail(BufferedImage bufferedImage) {
