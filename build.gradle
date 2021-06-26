@@ -51,6 +51,7 @@ dependencies {
     implementation "org.hibernate:hibernate-validator:6.1.5.Final"
     implementation "org.apache.commons:commons-lang3:3.11"
     implementation "org.imgscalr:imgscalr-lib:4.2"
+    implementation "org.apache.commons:commons-csv:1.8"
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
     testImplementation "org.mockito:mockito-core:${mockitoVersion}"

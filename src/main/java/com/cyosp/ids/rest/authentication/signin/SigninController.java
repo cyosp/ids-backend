@@ -2,6 +2,7 @@ package com.cyosp.ids.rest.authentication.signin;
 
 import com.cyosp.ids.rest.authentication.AuthenticationRequest;
 import com.cyosp.ids.security.jwt.JwtTokenProvider;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import static org.springframework.security.core.context.SecurityContextHolder.ge
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(SIGNIN_PATH)
 public class SigninController {
     public static final String SIGNIN_PATH = "/api/auth/signin";
@@ -29,10 +31,7 @@ public class SigninController {
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
-    public SigninController(JwtTokenProvider jwtTokenProvider, AuthenticationManagerBuilder authenticationManagerBuilder) {
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.authenticationManagerBuilder = authenticationManagerBuilder;
-    }
+    private final LoggedService loggedService;
 
     @PostMapping
     public ResponseEntity<SigninResponse> authorize(@Valid @RequestBody AuthenticationRequest authenticationRequest) {
@@ -45,6 +44,8 @@ public class SigninController {
         HttpHeaders httpHeaders = new HttpHeaders();
         String jwt = jwtTokenProvider.createToken(authentication);
         httpHeaders.add("Authorization", "Bearer " + jwt);
+
+        loggedService.add(authenticationRequest.getEmail());
 
         return new ResponseEntity<>(new SigninResponse(jwt), httpHeaders, OK);
     }
