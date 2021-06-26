@@ -17,14 +17,14 @@ import static org.tomlj.Toml.parse;
 @Slf4j
 @Component
 public class IdsConfiguration {
-    public static final String CONFIGURATION_DIRECTORY_PATH = "config" + separator;
+    public static final String DATA_DIRECTORY_PATH = "data" + separator;
     private static final String CONFIGURATION_FILE_NAME = "ids.toml";
 
     private TomlParseResult tomlParseResult;
 
     @PostConstruct
     public void init() throws IOException {
-        tomlParseResult = parse(Paths.get(CONFIGURATION_DIRECTORY_PATH + CONFIGURATION_FILE_NAME));
+        tomlParseResult = parse(Paths.get(DATA_DIRECTORY_PATH + CONFIGURATION_FILE_NAME));
         checkErrors();
     }
 

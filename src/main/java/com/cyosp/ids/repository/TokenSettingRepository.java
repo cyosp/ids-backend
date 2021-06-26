@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.File;
 
-import static com.cyosp.ids.configuration.IdsConfiguration.CONFIGURATION_DIRECTORY_PATH;
+import static com.cyosp.ids.configuration.IdsConfiguration.DATA_DIRECTORY_PATH;
 
 @Slf4j
 @Component
 public class TokenSettingRepository {
-    private final File tokenSettingFile = new File(CONFIGURATION_DIRECTORY_PATH + "ids.token-setting.json");
+    private final File tokenSettingFile = new File(DATA_DIRECTORY_PATH + "ids.token-setting.json");
 
     private final ObjectMapper objectMapper;
 

@@ -12,12 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.cyosp.ids.configuration.IdsConfiguration.CONFIGURATION_DIRECTORY_PATH;
+import static com.cyosp.ids.configuration.IdsConfiguration.DATA_DIRECTORY_PATH;
 
 @Slf4j
 @Component
 public class UserRepository {
-    private final File usersFile = new File(CONFIGURATION_DIRECTORY_PATH + "ids.users.json");
+    private final File usersFile = new File(DATA_DIRECTORY_PATH + "ids.users.json");
 
     private final ObjectMapper objectMapper;
 
