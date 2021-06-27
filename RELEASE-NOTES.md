@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 1.3.0 (2021-06-27)
+ * User registration can be disabled by configuration
+
 ##### 1.2.0 (2021-06-26)
  * Save logged user in an audit CSV file
  * Rename config folder into data folder

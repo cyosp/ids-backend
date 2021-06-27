@@ -11,7 +11,9 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import static java.io.File.separator;
+import static java.lang.Boolean.TRUE;
 import static java.lang.System.getProperty;
+import static java.util.Objects.isNull;
 import static org.tomlj.Toml.parse;
 
 @Slf4j
@@ -44,5 +46,14 @@ public class IdsConfiguration {
             imagesDirectory = userDir + imagesDirectory;
         }
         return imagesDirectory;
+    }
+
+    public boolean userCanSignup() {
+        final Boolean DEFAULT_SIGNUP_USER_BEHAVIOR = TRUE;
+        Boolean userCanSignup = tomlParseResult.getBoolean("signup.user");
+        if (isNull(userCanSignup)) {
+            userCanSignup = DEFAULT_SIGNUP_USER_BEHAVIOR;
+        }
+        return TRUE.equals(userCanSignup);
     }
 }

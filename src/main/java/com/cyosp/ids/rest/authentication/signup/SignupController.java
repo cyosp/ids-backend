@@ -1,9 +1,11 @@
 package com.cyosp.ids.rest.authentication.signup;
 
+import com.cyosp.ids.configuration.IdsConfiguration;
 import com.cyosp.ids.model.Role;
 import com.cyosp.ids.model.User;
 import com.cyosp.ids.repository.UserRepository;
 import com.cyosp.ids.rest.authentication.AuthenticationRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -23,15 +25,14 @@ import static org.springframework.http.HttpStatus.OK;
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(SIGNUP_PATH)
 public class SignupController {
     public static final String SIGNUP_PATH = "/api/auth/signup";
 
     private final UserRepository userRepository;
 
-    public SignupController(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private final IdsConfiguration idsConfiguration;
 
     ResponseEntity<SignupResponse> register(AuthenticationRequest authenticationRequest, Role role) {
         String email = authenticationRequest.getEmail();
@@ -67,6 +68,10 @@ public class SignupController {
 
     @PostMapping
     public ResponseEntity<SignupResponse> userRegister(@Valid @RequestBody AuthenticationRequest authenticationRequest) {
-        return register(authenticationRequest, VIEWER);
+        if (idsConfiguration.userCanSignup()) {
+            return register(authenticationRequest, VIEWER);
+        } else {
+            throw new AuthenticationServiceException("Register user not allowed");
+        }
     }
 }
