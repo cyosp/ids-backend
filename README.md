@@ -40,7 +40,6 @@ And run:
 ```
 docker run -v /path/to/ids/data/directory:/data \
     -v /path/to/images/directory:/shared-images \
-    -m 150M \
     -p 8080:8080 cyosp/ids-backend:0.0.0
 ```
 
