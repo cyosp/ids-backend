@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 1.3.1 (2021-06-28)
+* Fix: Missing JPEG libraries for Docker image
+
 ##### 1.3.0 (2021-06-27)
  * User registration can be disabled by configuration
 

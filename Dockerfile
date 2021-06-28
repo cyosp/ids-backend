@@ -1,4 +1,4 @@
-FROM alpine:3.12.1 as java-runtime
+FROM alpine:3.14.0 as java-runtime
 RUN apk add openjdk11
 RUN /usr/lib/jvm/java-11-openjdk/bin/jlink \
      --module-path /usr/lib/jvm/java-11-openjdk/jmods \
@@ -8,8 +8,10 @@ RUN /usr/lib/jvm/java-11-openjdk/bin/jlink \
      --no-man-pages \
      --output /opt/jre-11
 
-FROM alpine:3.12.1
+FROM alpine:3.14.0
 MAINTAINER CYOSP <cyosp@cyosp.com>
+
+RUN apk add libjpeg-turbo lcms2
 
 ENV JAVA_HOME=/opt/jre-11
 ENV PATH="$PATH:$JAVA_HOME/bin"
