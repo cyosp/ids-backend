@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 1.3.2 (2021-06-28)
+* Add logs when alternate formats are created
+
 ##### 1.3.1 (2021-06-28)
 * Fix: Missing JPEG libraries for Docker image
 

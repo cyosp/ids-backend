@@ -278,11 +278,15 @@ public class GraphQLDataFetchers {
                 if (!previewFile.exists() || !thumbnailFile.exists() || forceThumbnailGeneration) {
                     BufferedImage bufferedImage = read(image.getFile());
 
-                    if (!previewFile.exists())
+                    if (!previewFile.exists()) {
+                        log.info("Create: {}", previewFile.getAbsolutePath());
                         save(createPreview(bufferedImage), previewFile);
+                    }
 
-                    if (!thumbnailFile.exists() || forceThumbnailGeneration)
+                    if (!thumbnailFile.exists() || forceThumbnailGeneration) {
+                        log.info("Create: {}", thumbnailFile.getAbsolutePath());
                         save(createThumbnail(bufferedImage), thumbnailFile);
+                    }
 
                     images.add(image);
                 }
