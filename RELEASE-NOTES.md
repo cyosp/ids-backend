@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 1.4.0 (2021-06-30)
+* Alternative formats generation can be specified for a directory
+
 ##### 1.3.2 (2021-06-28)
 * Add logs when alternate formats are created
 
