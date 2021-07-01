@@ -72,5 +72,6 @@ jar {
 
 docker {
     name "cyosp/${rootProject.name}:${idsBackendVersion}"
-    copySpec.from("build/libs").into("build/libs")
+    copySpec.from("build/libs").into("docker-context")
+    files "generateAlternativeFormats.sh"
 }

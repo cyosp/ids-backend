@@ -18,5 +18,9 @@ ENV PATH="$PATH:$JAVA_HOME/bin"
 
 COPY --from=java-runtime /opt/jre-11 /opt/jre-11
 
-ADD build/libs/ids-*.jar /ids.jar
+RUN apk add imagemagick
+ADD docker-context/generateAlternativeFormats.sh /generateAlternativeFormats.sh
+RUN chmod +x /generateAlternativeFormats.sh
+
+ADD docker-context/ids-*.jar /ids.jar
 CMD java -jar /ids.jar

@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 1.5.0 (2021-07-01)
+* Add script to generate alternative formats
+
 ##### 1.4.0 (2021-06-30)
 * Alternative formats generation can be specified for a directory
 
