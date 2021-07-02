@@ -20,9 +20,10 @@ createThumbnail() {
       START_CROP=$(echo "($IMAGE_WIDTH-$IMAGE_HEIGHT)/2" | bc)
       CROP="${IMAGE_HEIGHT}x${IMAGE_HEIGHT}+$START_CROP+0"
     fi
+    echo "Start thumbnail generation"
     convert "$SOURCE_FILE" -crop "$CROP" "$THUMBNAIL_FILE_PATH"
     convert "$THUMBNAIL_FILE_PATH" -resize ${THUMBNAIL_SQUARE_SIZE}x${THUMBNAIL_SQUARE_SIZE} "$THUMBNAIL_FILE_PATH"
-    echo "Thumbnail generated"
+    echo "Done"
   else
     echo "Thumbnail already exists"
   fi
@@ -36,8 +37,9 @@ createPreview() {
     local IMAGE_HEIGHT=$(echo "$IMAGE_SIZE" | cut -d ' ' -f 2)
     local IMAGE_RATIO=$(awk "BEGIN { print "$IMAGE_WIDTH/$IMAGE_HEIGHT" }")
     local PREVIEW_IMAGE_WIDTH=$(echo "$PREVIEW_MAX_SIZE*$IMAGE_RATIO/1" | bc)
+    echo "Start preview generation"
     convert "$file" -resize ${PREVIEW_IMAGE_WIDTH} "$SOURCE_FILE"
-    echo "Preview generated"
+    echo "Done"
   else
     echo "Preview already exists"
   fi
