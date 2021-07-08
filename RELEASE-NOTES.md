@@ -1,5 +1,9 @@
 Release notes
 -------------
+##### 2.0.0 (2021-07-08)
+* Set cache control to images and alternative formats
+  Feature dedicated to @raoul2000
+
 ##### 1.5.0 (2021-07-01)
 * Add script to generate alternative formats
 

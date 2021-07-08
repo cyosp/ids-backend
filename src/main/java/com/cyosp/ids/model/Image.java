@@ -17,7 +17,8 @@ import static lombok.AccessLevel.PRIVATE;
 @Builder(access = PRIVATE)
 @EqualsAndHashCode(callSuper = true)
 public class Image extends FileSystemElement {
-    public static final String IMAGES_URL_PATH = "/images";
+    public static final String IMAGES_URL_PATH_PREFIX = "/images/";
+    public static final String FORMATS_URL_PATH_PREFIX = "/formats/";
     public static final String IDS_HIDDEN_DIRECTORY = ".ids";
 
     private String urlPath;
@@ -31,8 +32,6 @@ public class Image extends FileSystemElement {
     private String thumbnailUrlPath;
 
     public static Image from(String absoluteImagesDirectory, File relativeFile) {
-        final String urlPrefixPath = IMAGES_URL_PATH + "/";
-
         String name = relativeFile.getName();
 
         int dotIndex = name.lastIndexOf('.');
@@ -45,11 +44,11 @@ public class Image extends FileSystemElement {
         String thumbnailPath = parentDirectory + IDS_HIDDEN_DIRECTORY + separator + nameWithoutExtension + ".thumbnail.jpg";
 
         Image image = Image.builder()
-                .urlPath(urlPrefixPath + parentDirectory + name)
+                .urlPath(IMAGES_URL_PATH_PREFIX + parentDirectory + name)
                 .previewFile(new File(absoluteImagesDirectory + separator + previewPath))
-                .previewUrlPath(urlPrefixPath + previewPath)
+                .previewUrlPath(FORMATS_URL_PATH_PREFIX + previewPath)
                 .thumbnailFile(new File(absoluteImagesDirectory + separator + thumbnailPath))
-                .thumbnailUrlPath(urlPrefixPath + thumbnailPath)
+                .thumbnailUrlPath(FORMATS_URL_PATH_PREFIX + thumbnailPath)
                 .build();
         image.setup(absoluteImagesDirectory, relativeFile);
 

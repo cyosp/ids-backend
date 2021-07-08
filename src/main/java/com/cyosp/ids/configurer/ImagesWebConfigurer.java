@@ -5,7 +5,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import static com.cyosp.ids.model.Image.IMAGES_URL_PATH;
+import static com.cyosp.ids.model.Image.FORMATS_URL_PATH_PREFIX;
+import static com.cyosp.ids.model.Image.IMAGES_URL_PATH_PREFIX;
+import static java.io.File.separator;
+import static java.util.concurrent.TimeUnit.DAYS;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static org.springframework.http.CacheControl.maxAge;
 
 @Configuration
 public class ImagesWebConfigurer implements WebMvcConfigurer {
@@ -18,7 +23,14 @@ public class ImagesWebConfigurer implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry resourceHandlerRegistry) {
-        resourceHandlerRegistry.addResourceHandler(IMAGES_URL_PATH + "/**")
-                .addResourceLocations("file:" + idsConfiguration.getAbsoluteImagesDirectory() + "/");
+        final String resourceLocation = "file:" + idsConfiguration.getAbsoluteImagesDirectory() + separator;
+
+        resourceHandlerRegistry.addResourceHandler(FORMATS_URL_PATH_PREFIX + "**")
+                .addResourceLocations(resourceLocation)
+                .setCacheControl(maxAge(90, DAYS));
+
+        resourceHandlerRegistry.addResourceHandler(IMAGES_URL_PATH_PREFIX + "**")
+                .addResourceLocations(resourceLocation)
+                .setCacheControl(maxAge(10, MINUTES));
     }
 }
