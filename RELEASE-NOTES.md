@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 2.1.0 (2021-07-31)
+ * Don't display hidden directories
+
 ##### 2.0.0 (2021-07-08)
 * Set cache control to images and alternative formats
   Feature dedicated to @raoul2000

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.nio.file.Path;
 
-import static com.cyosp.ids.model.Image.IDS_HIDDEN_DIRECTORY;
 import static java.io.File.separator;
 
 @Service
@@ -36,7 +35,8 @@ public class ModelService {
     }
 
     public boolean isDirectory(Path path) {
-        return path.toFile().isDirectory() && !path.getFileName().toString().equals(IDS_HIDDEN_DIRECTORY);
+        File file = path.toFile();
+        return file.isDirectory() && !file.isHidden();
     }
 
     private File relative(Path path) {
