@@ -6,6 +6,9 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import static com.cyosp.ids.model.User.PASSWORD_MAX_LENGTH;
+import static com.cyosp.ids.model.User.PASSWORD_MIN_LENGTH;
+
 @Data
 public class AuthenticationRequest {
     @Email
@@ -14,6 +17,6 @@ public class AuthenticationRequest {
     private String email;
 
     @NotNull
-    @Size(min = 8, max = 64)
+    @Size(min = PASSWORD_MIN_LENGTH, max = PASSWORD_MAX_LENGTH)
     private String password;
 }
