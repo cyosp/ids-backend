@@ -75,6 +75,8 @@ public class GraphQLProvider {
                         .dataFetcher("users", graphQLDataFetchers.getUsersDataFetcher()))
                 .type(newTypeWiring(MUTATION)
                         .dataFetcher("generateAlternativeFormats", graphQLDataFetchers.generateAlternativeFormats()))
+                .type(newTypeWiring(MUTATION)
+                        .dataFetcher("changePassword", graphQLDataFetchers.changePassword()))
                 .build();
     }
 

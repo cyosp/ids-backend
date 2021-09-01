@@ -1,5 +1,10 @@
 Release notes
 -------------
+##### 3.0.0 (2021-09-01)
+ * Add changePassword mutation
+ * Save user hashed password in correct User field
+ * Remove password from User in GraphQL schema
+
 ##### 2.1.0 (2021-07-31)
  * Don't display hidden directories
 

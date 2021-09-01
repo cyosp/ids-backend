@@ -5,11 +5,11 @@ import com.cyosp.ids.model.Role;
 import com.cyosp.ids.model.User;
 import com.cyosp.ids.repository.UserRepository;
 import com.cyosp.ids.rest.authentication.AuthenticationRequest;
+import com.cyosp.ids.service.PasswordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +34,8 @@ public class SignupController {
 
     private final IdsConfiguration idsConfiguration;
 
+    private final PasswordService passwordService;
+
     ResponseEntity<SignupResponse> register(AuthenticationRequest authenticationRequest, Role role) {
         String email = authenticationRequest.getEmail();
 
@@ -42,10 +44,12 @@ public class SignupController {
         if (userFound)
             throw new AuthenticationServiceException("User already registered");
 
+        String password = authenticationRequest.getPassword();
         User user = User.builder()
                 .id(randomUUID().toString())
                 .email(authenticationRequest.getEmail())
-                .password(new BCryptPasswordEncoder().encode(authenticationRequest.getPassword()))
+                .password(password)
+                .hashedPassword(passwordService.encode(password))
                 .role(role)
                 .build();
 

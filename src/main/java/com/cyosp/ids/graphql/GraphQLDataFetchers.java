@@ -7,9 +7,13 @@ import com.cyosp.ids.model.Image;
 import com.cyosp.ids.model.User;
 import com.cyosp.ids.repository.UserRepository;
 import com.cyosp.ids.service.ModelService;
+import com.cyosp.ids.service.PasswordService;
 import graphql.GraphQLContext;
 import graphql.schema.DataFetcher;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
@@ -46,11 +50,14 @@ import static org.springframework.security.core.context.SecurityContextHolder.ge
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class GraphQLDataFetchers {
     private static final String DIRECTORY = "directory";
     private static final String DIRECTORY_REVERSED_ORDER = "directoryReversedOrder";
     private static final String PREVIEW_DIRECTORY_REVERSED_ORDER = "previewDirectoryReversedOrder";
     private static final String FORCE_THUMBNAIL_GENERATION = "forceThumbnailGeneration";
+    private static final String PASSWORD = "password";
+    private static final String NEW_PASSWORD = "newPassword";
 
     private final IdsConfiguration idsConfiguration;
 
@@ -58,13 +65,9 @@ public class GraphQLDataFetchers {
 
     private final ModelService modelService;
 
-    public GraphQLDataFetchers(IdsConfiguration idsConfiguration,
-                               UserRepository userRepository,
-                               ModelService modelService) {
-        this.idsConfiguration = idsConfiguration;
-        this.userRepository = userRepository;
-        this.modelService = modelService;
-    }
+    private final PasswordService passwordService;
+
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
     List<Image> listImagesInAllDirectories(String directory, boolean directoryReversedOrder, boolean previewDirectoryReversedOrder) {
         List<Image> images = new ArrayList<>();
@@ -293,5 +296,23 @@ public class GraphQLDataFetchers {
             }
             return images;
         };
+    }
+
+    public DataFetcher<User> changePassword() {
+        return dataFetchingEnvironment -> {
+            authenticateTokenizedUserWith(dataFetchingEnvironment.getArgument(PASSWORD));
+
+            User user = userRepository.getByEmail(getContext().getAuthentication().getName());
+            user.setPassword(dataFetchingEnvironment.getArgument(NEW_PASSWORD));
+            user.setHashedPassword(passwordService.encode(user.getPassword()));
+            return userRepository.save(user);
+        };
+    }
+
+    private void authenticateTokenizedUserWith(String password) {
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                new UsernamePasswordAuthenticationToken(getContext().getAuthentication().getName(), password);
+
+        authenticationManagerBuilder.getObject().authenticate(usernamePasswordAuthenticationToken);
     }
 }

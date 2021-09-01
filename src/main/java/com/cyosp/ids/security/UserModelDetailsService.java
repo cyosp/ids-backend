@@ -5,7 +5,6 @@ import com.cyosp.ids.repository.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import static java.util.List.of;
@@ -20,14 +19,11 @@ public class UserModelDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(final String email) {
-        return userRepository.findByEmail(email)
-                .map(this::createSpringSecurityUser)
-                .orElseThrow(() -> new UsernameNotFoundException("Email not found: " + email));
-
+        return createSpringSecurityUser(userRepository.getByEmail(email));
     }
 
     private org.springframework.security.core.userdetails.User createSpringSecurityUser(User user) {
-        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(),
+        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getHashedPassword(),
                 of(new SimpleGrantedAuthority(user.getRole().name())));
     }
 }
