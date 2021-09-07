@@ -1,5 +1,6 @@
 package com.cyosp.ids.repository;
 
+import com.cyosp.ids.graphql.exception.IncorrectSizeException;
 import com.cyosp.ids.model.User;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,17 +11,17 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.validation.ConstraintViolation;
-import javax.validation.ValidationException;
 import javax.validation.Validator;
+import javax.validation.constraints.Size;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.cyosp.ids.configuration.IdsConfiguration.DATA_DIRECTORY_PATH;
 import static java.util.Objects.isNull;
-import static java.util.stream.Collectors.joining;
 import static org.springframework.beans.BeanUtils.copyProperties;
 
 @Slf4j
@@ -100,9 +101,17 @@ public class UserRepository {
     private void validate(User user) {
         Set<ConstraintViolation<User>> constraintViolations = validator.validate(user);
         if (!constraintViolations.isEmpty()) {
-            throw new ValidationException(constraintViolations.stream()
-                    .map(ConstraintViolation::getMessage)
-                    .collect(joining(", ")));
+            constraintViolations.stream()
+                    .findFirst()
+                    .ifPresent(constraintViolation -> {
+                        String annotation = constraintViolation.getConstraintDescriptor().getAnnotation().toString();
+                        if (annotation.contains(Size.class.getName())) {
+                            Map<String, Object> attributes = constraintViolation.getConstraintDescriptor().getAttributes();
+                            int minSize = (int) attributes.get("min");
+                            int maxSize = (int) attributes.get("max");
+                            throw new IncorrectSizeException(constraintViolation.getMessage(), minSize, maxSize);
+                        }
+                    });
         }
     }
 }

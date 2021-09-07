@@ -1,6 +1,7 @@
 package com.cyosp.ids.graphql;
 
 import com.cyosp.ids.configuration.IdsConfiguration;
+import com.cyosp.ids.graphql.exception.BadCredentialsException;
 import com.cyosp.ids.model.Directory;
 import com.cyosp.ids.model.FileSystemElement;
 import com.cyosp.ids.model.Image;
@@ -312,7 +313,10 @@ public class GraphQLDataFetchers {
     private void authenticateTokenizedUserWith(String password) {
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
                 new UsernamePasswordAuthenticationToken(getContext().getAuthentication().getName(), password);
-
-        authenticationManagerBuilder.getObject().authenticate(usernamePasswordAuthenticationToken);
+        try {
+            authenticationManagerBuilder.getObject().authenticate(usernamePasswordAuthenticationToken);
+        } catch (Exception e) {
+            throw new BadCredentialsException(e.getMessage());
+        }
     }
 }
