@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 3.2.0 (2021-09-08)
+ * Check password has changed during changePassword mutation
+
 ##### 3.1.0 (2021-09-07)
  * Improve changePassword mutation errors details
 
