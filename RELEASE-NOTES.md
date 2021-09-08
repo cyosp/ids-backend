@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 3.2.1 (2021-09-08)
+ * Fix: changePassword mutation parameters can be optionals
+
 ##### 3.2.0 (2021-09-08)
  * Check password has changed during changePassword mutation
 

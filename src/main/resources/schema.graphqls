@@ -39,5 +39,5 @@ type User {
 
 type Mutation {
     generateAlternativeFormats(directory: ID, forceThumbnailGeneration: Boolean): [Image]
-    changePassword(password: String, newPassword: String): User
+    changePassword(password: String!, newPassword: String!): User
 }
