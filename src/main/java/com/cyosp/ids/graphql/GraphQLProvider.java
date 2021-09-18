@@ -77,6 +77,8 @@ public class GraphQLProvider {
                         .dataFetcher("generateAlternativeFormats", graphQLDataFetchers.generateAlternativeFormats()))
                 .type(newTypeWiring(MUTATION)
                         .dataFetcher("changePassword", graphQLDataFetchers.changePassword()))
+                .type(newTypeWiring(MUTATION)
+                        .dataFetcher("deleteImage", graphQLDataFetchers.deleteImage()))
                 .build();
     }
 

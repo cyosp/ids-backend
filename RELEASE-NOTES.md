@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 4.0.0 (2021-09-18)
+ * Add deleteImage mutation
+
 ##### 3.2.1 (2021-09-08)
  * Fix: changePassword mutation parameters can be optionals
 
