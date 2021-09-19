@@ -43,7 +43,6 @@ public class SigninController {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         String jwt = jwtTokenProvider.createToken(authentication);
-        httpHeaders.add("Authorization", "Bearer " + jwt);
 
         loggedService.add(authenticationRequest.getEmail());
 
