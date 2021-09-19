@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 4.1.0 (2021-09-19)
+ * Add user role on signin endpoint
+
 ##### 4.0.0 (2021-09-18)
  * Add deleteImage mutation
 
