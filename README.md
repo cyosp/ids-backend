@@ -45,3 +45,7 @@ docker run -v /path/to/ids/data/directory:/data \
 
 */!\ Both directories must have write permissions for 'other' file system group /!\\*
 
+## About Log4Shell
+
+Vulnerability is due to `log4j-core` library which is not part of project dependencies
+
