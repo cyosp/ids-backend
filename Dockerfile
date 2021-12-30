@@ -1,24 +1,25 @@
-FROM alpine:3.14.0 as java-runtime
-RUN apk add openjdk11
-RUN /usr/lib/jvm/java-11-openjdk/bin/jlink \
-     --module-path /usr/lib/jvm/java-11-openjdk/jmods \
+FROM debian:bullseye-slim as java-runtime
+RUN apt update && apt upgrade -y
+RUN apt install -y openjdk-11-jdk-headless
+RUN jlink \
+     --module-path $(echo $(dirname $(readlink $(readlink $(whereis jlink))))/../jmods) \
      --compress=2 \
      --add-modules java.base,java.compiler,java.desktop,java.instrument,java.logging,java.management,java.management.rmi,java.naming,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml,jdk.httpserver,jdk.unsupported \
      --no-header-files \
      --no-man-pages \
      --output /opt/jre-11
 
-FROM alpine:3.14.0
+FROM debian:bullseye-slim
 MAINTAINER CYOSP <cyosp@cyosp.com>
 
-RUN apk add libjpeg-turbo lcms2
+RUN apt update && apt upgrade -y
 
 ENV JAVA_HOME=/opt/jre-11
 ENV PATH="$PATH:$JAVA_HOME/bin"
 
 COPY --from=java-runtime /opt/jre-11 /opt/jre-11
 
-RUN apk add imagemagick
+RUN apt install -y imagemagick
 ADD docker-context/generateAlternativeFormats.sh /generateAlternativeFormats.sh
 RUN chmod +x /generateAlternativeFormats.sh
 

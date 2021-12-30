@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 4.2.0 (2021-12-30)
+ * Build Docker image for Linux ARM v7
+
 ##### 4.1.0 (2021-09-19)
  * Add user role on signin endpoint
 
