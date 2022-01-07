@@ -19,7 +19,7 @@ ENV PATH="$PATH:$JAVA_HOME/bin"
 
 COPY --from=java-runtime /opt/jre-11 /opt/jre-11
 
-RUN apt install -y imagemagick
+RUN apt install -y bc imagemagick
 ADD docker-context/generateAlternativeFormats.sh /generateAlternativeFormats.sh
 RUN chmod +x /generateAlternativeFormats.sh
 

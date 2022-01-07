@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 4.2.1 (2022-01-07)
+ * Fix: Missing bc tool for generateAlternativeFormats.sh
+
 ##### 4.2.0 (2021-12-30)
  * Build Docker image for Linux ARM v7
 
