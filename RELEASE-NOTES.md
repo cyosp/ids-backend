@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 4.2.2 (2022-01-19)
+ * Fix: Incorrect encoding on Docker volumes
+
 ##### 4.2.1 (2022-01-07)
  * Fix: Missing bc tool for generateAlternativeFormats.sh
 

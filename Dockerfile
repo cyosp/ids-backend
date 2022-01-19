@@ -14,6 +14,9 @@ MAINTAINER CYOSP <cyosp@cyosp.com>
 
 RUN apt update && apt upgrade -y
 
+RUN apt -y install locales && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
+ENV LANG en_US.UTF-8
+
 ENV JAVA_HOME=/opt/jre-11
 ENV PATH="$PATH:$JAVA_HOME/bin"
 
