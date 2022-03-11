@@ -1,5 +1,6 @@
 package com.cyosp.ids.configuration;
 
+import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.tomlj.TomlParseError;
@@ -19,6 +20,9 @@ import static org.tomlj.Toml.parse;
 @Slf4j
 @Component
 public class IdsConfiguration {
+    @VisibleForTesting
+    static final String SIGNUP_USER_PROPERTY = "signup.user";
+
     public static final String DATA_DIRECTORY_PATH = "data" + separator;
     private static final String CONFIGURATION_FILE_NAME = "ids.toml";
 
@@ -49,10 +53,9 @@ public class IdsConfiguration {
     }
 
     public boolean userCanSignup() {
-        final Boolean DEFAULT_SIGNUP_USER_BEHAVIOR = TRUE;
-        Boolean userCanSignup = tomlParseResult.getBoolean("signup.user");
+        Boolean userCanSignup = tomlParseResult.getBoolean(SIGNUP_USER_PROPERTY);
         if (isNull(userCanSignup)) {
-            userCanSignup = DEFAULT_SIGNUP_USER_BEHAVIOR;
+            userCanSignup = TRUE;
         }
         return TRUE.equals(userCanSignup);
     }
