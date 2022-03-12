@@ -21,6 +21,8 @@ import static org.tomlj.Toml.parse;
 @Component
 public class IdsConfiguration {
     @VisibleForTesting
+    static final String IMAGES_PUBLIC_SHARE_PROPERTY = "images.public-share";
+    @VisibleForTesting
     static final String SIGNUP_USER_PROPERTY = "signup.user";
 
     public static final String DATA_DIRECTORY_PATH = "data" + separator;
@@ -55,5 +57,9 @@ public class IdsConfiguration {
     public boolean userCanSignup() {
         Boolean userCanSignup = tomlParseResult.getBoolean(SIGNUP_USER_PROPERTY);
         return isNull(userCanSignup) ? TRUE : TRUE.equals(userCanSignup);
+    }
+
+    public boolean areImagesPublicShared() {
+        return TRUE.equals(tomlParseResult.getBoolean(IMAGES_PUBLIC_SHARE_PROPERTY));
     }
 }

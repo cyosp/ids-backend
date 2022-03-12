@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 5.0.0 (2022-03-12)
+ * Based on a configuration flag images can be public shared
+
 ##### 4.2.2 (2022-01-19)
  * Fix: Incorrect encoding on Docker volumes
 

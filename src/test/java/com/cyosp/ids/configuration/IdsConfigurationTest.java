@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.tomlj.TomlParseResult;
 
+import static com.cyosp.ids.configuration.IdsConfiguration.IMAGES_PUBLIC_SHARE_PROPERTY;
 import static com.cyosp.ids.configuration.IdsConfiguration.SIGNUP_USER_PROPERTY;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -45,5 +46,32 @@ class IdsConfigurationTest {
                 .getBoolean(SIGNUP_USER_PROPERTY);
 
         assertFalse(idsConfiguration.userCanSignup());
+    }
+
+    @Test
+    void areImagesPublicShared_propertyNotDefined() {
+        doReturn(null)
+                .when(tomlParseResult)
+                .getBoolean(IMAGES_PUBLIC_SHARE_PROPERTY);
+
+        assertFalse(idsConfiguration.areImagesPublicShared());
+    }
+
+    @Test
+    void areImagesPublicShared_propertySetToTrue() {
+        doReturn(true)
+                .when(tomlParseResult)
+                .getBoolean(IMAGES_PUBLIC_SHARE_PROPERTY);
+
+        assertTrue(idsConfiguration.areImagesPublicShared());
+    }
+
+    @Test
+    void areImagesPublicShared_propertySetToFalse() {
+        doReturn(false)
+                .when(tomlParseResult)
+                .getBoolean(IMAGES_PUBLIC_SHARE_PROPERTY);
+
+        assertFalse(idsConfiguration.areImagesPublicShared());
     }
 }
