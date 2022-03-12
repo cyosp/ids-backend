@@ -54,9 +54,6 @@ public class IdsConfiguration {
 
     public boolean userCanSignup() {
         Boolean userCanSignup = tomlParseResult.getBoolean(SIGNUP_USER_PROPERTY);
-        if (isNull(userCanSignup)) {
-            userCanSignup = TRUE;
-        }
-        return TRUE.equals(userCanSignup);
+        return isNull(userCanSignup) ? TRUE : TRUE.equals(userCanSignup);
     }
 }
