@@ -78,8 +78,8 @@ public class GraphQLDataFetchers {
             else {
                 images.addAll(
                         listRecursively(fileSystemElement.getId(), directoryReversedOrder, previewDirectoryReversedOrder).stream()
-                                .filter(fse -> fse instanceof Image)
-                                .map(image -> (Image) image)
+                                .filter(Image.class::isInstance)
+                                .map(Image.class::cast)
                                 .collect(toList()));
             }
         }
