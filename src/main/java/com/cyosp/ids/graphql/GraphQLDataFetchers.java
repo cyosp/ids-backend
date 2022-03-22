@@ -138,6 +138,7 @@ public class GraphQLDataFetchers {
         Image image = fileSystemElements.stream()
                 .map(fse -> Path.of(fse.getFile().toURI()))
                 .filter(modelService::isImage)
+                .sorted(previewDirectoryReversedOrder ? reverseOrder() : naturalOrder())
                 .map(modelService::imageFrom)
                 .findFirst()
                 .orElse(null);

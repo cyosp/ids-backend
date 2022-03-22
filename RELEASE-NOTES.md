@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 5.0.1 (2022-03-22)
+ * Fix: Preview directory reversed order is not applied
+
 ##### 5.0.0 (2022-03-12)
  * Based on a configuration flag images can be public shared
 
