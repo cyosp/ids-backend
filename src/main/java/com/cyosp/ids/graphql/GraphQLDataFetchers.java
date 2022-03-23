@@ -15,6 +15,8 @@ import graphql.GraphQLContext;
 import graphql.schema.DataFetcher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,9 +30,14 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.cyosp.ids.model.Role.ADMINISTRATOR;
 import static java.awt.Image.SCALE_SMOOTH;
@@ -38,12 +45,18 @@ import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static java.io.File.separator;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
-import static java.nio.file.Files.*;
+import static java.nio.file.Files.createDirectories;
+import static java.nio.file.Files.delete;
+import static java.nio.file.Files.newDirectoryStream;
 import static java.nio.file.Paths.get;
-import static java.util.Comparator.*;
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.reverseOrder;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
-import static javax.imageio.ImageIO.*;
+import static javax.imageio.ImageIO.createImageOutputStream;
+import static javax.imageio.ImageIO.getImageWritersByFormatName;
+import static javax.imageio.ImageIO.read;
 import static javax.imageio.ImageWriteParam.MODE_EXPLICIT;
 import static org.imgscalr.Scalr.resize;
 import static org.springframework.security.core.context.SecurityContextHolder.getContext;
@@ -69,6 +82,18 @@ public class GraphQLDataFetchers {
     private final PasswordService passwordService;
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
+
+    private final Map<String, Image> previewDirectoryNaturalOrderMap = new HashMap<>();
+    private final Map<String, Image> previewDirectoryReversedOrderMap = new HashMap<>();
+    private boolean previewDirectoryLoaded = false;
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void loadPreviewDirectory() {
+        if(idsConfiguration.isStaticPreviewDirectory()) {
+            list(null, true, false, false);
+            previewDirectoryLoaded = true;
+        }
+    }
 
     List<Image> listImagesInAllDirectories(String directory, boolean directoryReversedOrder, boolean previewDirectoryReversedOrder) {
         List<Image> images = new ArrayList<>();
@@ -118,7 +143,21 @@ public class GraphQLDataFetchers {
                 .sorted(directoryReversedOrder ? reverseOrder() : naturalOrder())
                 .forEach(path -> {
                     Directory directory = modelService.directoryFrom(path);
-                    directory.setPreview(preview(directory, previewDirectoryReversedOrder));
+                    Image preview = null;
+                    if(idsConfiguration.isStaticPreviewDirectory()) {
+                        String directoryId = directory.getId();
+                        if(previewDirectoryLoaded) {
+                            preview = (previewDirectoryReversedOrder ? previewDirectoryReversedOrderMap
+                                    : previewDirectoryNaturalOrderMap).get(directoryId);
+                        } else {
+                            // TODO Avoid to iterate twice
+                            previewDirectoryNaturalOrderMap.put(directoryId,  preview(directory, false));
+                            previewDirectoryReversedOrderMap.put(directoryId,  preview(directory, true));
+                        }
+                    } else {
+                       preview = preview(directory, previewDirectoryReversedOrder);
+                    }
+                    directory.setPreview(preview);
                     fileSystemElements.add(directory);
                     if (recursive) {
                         fileSystemElements.addAll(listRecursively(modelService.stringRelative(path), directoryReversedOrder, previewDirectoryReversedOrder));

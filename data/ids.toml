@@ -1,6 +1,7 @@
 [images]
 directory="."
 public-share=false
+static-preview-directory=false
 
 [signup]
 user=true

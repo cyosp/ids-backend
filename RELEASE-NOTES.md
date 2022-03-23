@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 5.1.0 (2022-03-23)
+ * Add configuration flag to define preview directory as static on server startup
+
 ##### 5.0.1 (2022-03-22)
  * Fix: Preview directory reversed order is not applied
 
