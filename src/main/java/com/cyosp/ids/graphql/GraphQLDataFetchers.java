@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.cyosp.ids.model.Role.ADMINISTRATOR;
 import static java.awt.Image.SCALE_SMOOTH;
@@ -52,6 +53,7 @@ import static java.nio.file.Paths.get;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.reverseOrder;
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static javax.imageio.ImageIO.createImageOutputStream;
@@ -182,19 +184,15 @@ public class GraphQLDataFetchers {
                 .findFirst()
                 .orElse(null);
 
-        if (ofNullable(image).isEmpty()) {
-            Directory nextDirectory = fileSystemElements.stream()
-                    .map(fse -> Path.of(fse.getFile().toURI()))
-                    .filter(modelService::isDirectory)
-                    .map(modelService::directoryFrom)
-                    .findFirst()
-                    .orElse(null);
-            if (ofNullable(nextDirectory).isPresent()) {
-                image = preview(nextDirectory, previewDirectoryReversedOrder);
-            }
-        }
-
-        return image;
+        return ofNullable(image)
+                .orElse(fileSystemElements.stream()
+                        .map(fse -> Path.of(fse.getFile().toURI()))
+                        .filter(modelService::isDirectory)
+                        .map(modelService::directoryFrom)
+                        .map(dir -> preview(dir, previewDirectoryReversedOrder))
+                        .filter(Objects::nonNull)
+                        .findFirst()
+                        .orElse(null));
     }
 
     public DataFetcher<List<FileSystemElement>> getFileSystemElementsDataFetcher() {

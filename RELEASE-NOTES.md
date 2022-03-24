@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 5.2.0 (2022-03-24)
+ * For directories with no image, preview directory is the first directory with a preview available 
+
 ##### 5.1.0 (2022-03-23)
  * Add configuration flag to define preview directory as static on server startup
 
