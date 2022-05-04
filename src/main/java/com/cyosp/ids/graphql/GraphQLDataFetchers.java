@@ -13,6 +13,7 @@ import com.cyosp.ids.service.ModelService;
 import com.cyosp.ids.service.PasswordService;
 import graphql.GraphQLContext;
 import graphql.schema.DataFetcher;
+import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -211,6 +212,10 @@ public class GraphQLDataFetchers {
         };
     }
 
+    public DataFetcher<Image> getImage() {
+        return this::getImage;
+    }
+
     public DataFetcher<List<FileSystemElement>> getDirectoryElementsDataFetcher() {
         return dataFetchingEnvironment -> {
             Directory directory = dataFetchingEnvironment.getSource();
@@ -358,16 +363,19 @@ public class GraphQLDataFetchers {
         return dataFetchingEnvironment -> {
             checkAdministratorUser();
 
-            String imageId = dataFetchingEnvironment.getArgument(IMAGE).toString();
-            Path absoluteImagePath = Paths.get(idsConfiguration.getAbsoluteImagesDirectory(), separator, imageId);
-            Image image = modelService.imageFrom(absoluteImagePath);
-
+            Image image = getImage(dataFetchingEnvironment);
             deleteImage(image.getThumbnailFile(), false);
             deleteImage(image.getPreviewFile(), false);
             deleteImage(image.getFile(), true);
 
             return image;
         };
+    }
+
+    private Image getImage(DataFetchingEnvironment dataFetchingEnvironment) {
+        String imageId = dataFetchingEnvironment.getArgument(IMAGE).toString();
+        Path absoluteImagePath = Paths.get(idsConfiguration.getAbsoluteImagesDirectory(), separator, imageId);
+        return modelService.imageFrom(absoluteImagePath);
     }
 
     private void deleteImage(File image, boolean imageMustExist) throws IOException {

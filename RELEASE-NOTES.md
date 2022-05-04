@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 5.3.0 (2022-05-04)
+ * Add getImage GraphQL query
+
 ##### 5.2.0 (2022-03-24)
  * For directories with no image, preview directory is the first directory with a preview available 
 
