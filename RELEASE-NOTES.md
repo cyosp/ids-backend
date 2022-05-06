@@ -1,5 +1,9 @@
 Release notes
 -------------
+##### 5.4.1 (2022-05-06)
+ * Update getImage GraphQL query signature
+     - Move image type from ID to String
+
 ##### 5.4.0 (2022-05-06)
  * Update getImage GraphQL query signature
     - Image path argument is replaced by image directory and image name 
