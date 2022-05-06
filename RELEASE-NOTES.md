@@ -1,5 +1,10 @@
 Release notes
 -------------
+##### 5.4.0 (2022-05-06)
+ * Update getImage GraphQL query signature
+    - Image path argument is replaced by image directory and image name 
+    - Image returned is replaced by an image list with: previous image, asked image and next one image
+
 ##### 5.3.0 (2022-05-04)
  * Add getImage GraphQL query
 

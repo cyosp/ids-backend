@@ -33,10 +33,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -51,6 +53,7 @@ import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.delete;
 import static java.nio.file.Files.newDirectoryStream;
 import static java.nio.file.Paths.get;
+import static java.util.Arrays.asList;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.reverseOrder;
@@ -129,12 +132,8 @@ public class GraphQLDataFetchers {
     private List<FileSystemElement> list(String directoryString, boolean recursive, boolean directoryReversedOrder, boolean previewDirectoryReversedOrder) {
         final List<FileSystemElement> fileSystemElements = new ArrayList<>();
 
-        final StringBuilder absoluteDirectoryPath = new StringBuilder(idsConfiguration.getAbsoluteImagesDirectory());
-        if (ofNullable(directoryString).isPresent())
-            absoluteDirectoryPath.append(separator).append(directoryString);
-
         List<Path> unorderedPaths = new ArrayList<>();
-        try (DirectoryStream<Path> paths = newDirectoryStream(get(absoluteDirectoryPath.toString()),
+        try (DirectoryStream<Path> paths = newDirectoryStream(get(getAbsoluteDirectoryPath(directoryString)),
                 path -> modelService.isImage(path) || modelService.isDirectory(path))) {
             paths.forEach(unorderedPaths::add);
         } catch (IOException e) {
@@ -172,6 +171,13 @@ public class GraphQLDataFetchers {
                 .forEach(path -> fileSystemElements.add(modelService.imageFrom(path)));
 
         return fileSystemElements;
+    }
+
+    private String getAbsoluteDirectoryPath(String relativeDirectory) {
+        final StringBuilder absoluteDirectoryPath = new StringBuilder(idsConfiguration.getAbsoluteImagesDirectory());
+        if (ofNullable(relativeDirectory).isPresent())
+            absoluteDirectoryPath.append(separator).append(relativeDirectory);
+        return absoluteDirectoryPath.toString();
     }
 
     Image preview(Directory directory, boolean previewDirectoryReversedOrder) {
@@ -212,8 +218,27 @@ public class GraphQLDataFetchers {
         };
     }
 
-    public DataFetcher<Image> getImage() {
-        return this::getImage;
+    public DataFetcher<List<Image>> getImage() {
+        return dataFetchingEnvironment -> {
+            Iterator<Path> pathIterator = Files.list(get(getAbsoluteDirectoryPath(dataFetchingEnvironment.getArgument(DIRECTORY))))
+                    .filter(modelService::isImage)
+                    .sorted(comparing(path -> path.getFileName().toString()))
+                    .iterator();
+
+            String image = dataFetchingEnvironment.getArgument(IMAGE);
+            Path currentPath = null;
+            while (pathIterator.hasNext()) {
+                Path previousPath = currentPath;
+                currentPath = pathIterator.next();
+                if (currentPath.getFileName().toString().equals(image)) {
+                    return asList(nonNull(previousPath) ? modelService.imageFrom(previousPath) : null,
+                            modelService.imageFrom(currentPath),
+                            pathIterator.hasNext() ? modelService.imageFrom(pathIterator.next()) : null);
+                }
+            }
+
+            return asList(null, null, null);
+        };
     }
 
     public DataFetcher<List<FileSystemElement>> getDirectoryElementsDataFetcher() {
