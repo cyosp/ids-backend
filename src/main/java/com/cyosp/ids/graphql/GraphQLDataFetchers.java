@@ -218,7 +218,7 @@ public class GraphQLDataFetchers {
         };
     }
 
-    public DataFetcher<List<Image>> getImage() {
+    public DataFetcher<List<Image>> getImages() {
         return dataFetchingEnvironment -> {
             Iterator<Path> pathIterator = Files.list(get(getAbsoluteDirectoryPath(dataFetchingEnvironment.getArgument(DIRECTORY))))
                     .filter(modelService::isImage)

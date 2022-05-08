@@ -72,7 +72,7 @@ public class GraphQLProvider {
                 .type(newTypeWiring(QUERY)
                         .dataFetcher("list", graphQLDataFetchers.getFileSystemElementsDataFetcher()))
                 .type(newTypeWiring(QUERY)
-                        .dataFetcher("getImage", graphQLDataFetchers.getImage()))
+                        .dataFetcher("getImages", graphQLDataFetchers.getImages()))
                 .type(newTypeWiring(QUERY)
                         .dataFetcher("users", graphQLDataFetchers.getUsersDataFetcher()))
                 .type(newTypeWiring(MUTATION)
