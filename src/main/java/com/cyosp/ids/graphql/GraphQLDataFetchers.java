@@ -218,6 +218,10 @@ public class GraphQLDataFetchers {
         };
     }
 
+    public DataFetcher<Image> getImage() {
+        return this::getImage;
+    }
+
     public DataFetcher<List<Image>> getImages() {
         return dataFetchingEnvironment -> {
             Iterator<Path> pathIterator = Files.list(get(getAbsoluteDirectoryPath(dataFetchingEnvironment.getArgument(DIRECTORY))))

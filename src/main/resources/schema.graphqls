@@ -1,6 +1,7 @@
 type Query {
     list(directory: ID, directoryReversedOrder: Boolean, previewDirectoryReversedOrder: Boolean): [FileSystemElement]
     getImages(directory: ID, image: String!): [Image]
+    getImage(image: ID!): Image
     users: [User]
 }
 
