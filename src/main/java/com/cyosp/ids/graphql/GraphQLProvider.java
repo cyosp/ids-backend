@@ -3,6 +3,7 @@ package com.cyosp.ids.graphql;
 import com.cyosp.ids.model.Directory;
 import com.cyosp.ids.model.FileSystemElement;
 import com.cyosp.ids.model.Image;
+import com.cyosp.ids.model.ImageMetadata;
 import com.google.common.io.Resources;
 import graphql.GraphQL;
 import graphql.schema.GraphQLSchema;
@@ -49,6 +50,8 @@ public class GraphQLProvider {
         Object object = typeResolutionEnvironment.getObject();
         if (object instanceof Image) {
             return typeResolutionEnvironment.getSchema().getObjectType(Image.class.getSimpleName());
+        } else if (object instanceof ImageMetadata) {
+            return typeResolutionEnvironment.getSchema().getObjectType(ImageMetadata.class.getSimpleName());
         } else if (object instanceof Directory) {
             return typeResolutionEnvironment.getSchema().getObjectType(Directory.class.getSimpleName());
         } else {
@@ -67,6 +70,8 @@ public class GraphQLProvider {
         return newRuntimeWiring()
                 .type(FileSystemElement.class.getSimpleName(),
                         typeWriting -> typeWriting.typeResolver(fileSystemElementTypeResolver))
+                .type(newTypeWiring(Image.class.getSimpleName())
+                        .dataFetcher("metadata", graphQLDataFetchers.getImageMetadata()))
                 .type(newTypeWiring(Directory.class.getSimpleName())
                         .dataFetcher("elements", graphQLDataFetchers.getDirectoryElementsDataFetcher()))
                 .type(newTypeWiring(QUERY)

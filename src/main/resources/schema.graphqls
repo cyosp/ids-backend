@@ -26,6 +26,11 @@ type Image implements FileSystemElement {
     urlPath: String
     previewUrlPath: String
     thumbnailUrlPath: String
+    metadata: ImageMetadata
+}
+
+type ImageMetadata {
+    takenAt: String
 }
 
 enum Role {

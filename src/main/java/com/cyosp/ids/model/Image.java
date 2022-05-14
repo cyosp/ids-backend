@@ -31,6 +31,8 @@ public class Image extends FileSystemElement {
 
     private String thumbnailUrlPath;
 
+    private ImageMetadata metadata;
+
     public static Image from(String absoluteImagesDirectory, File relativeFile) {
         String name = relativeFile.getName();
 

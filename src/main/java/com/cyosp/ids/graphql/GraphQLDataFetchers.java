@@ -7,6 +7,7 @@ import com.cyosp.ids.graphql.exception.SameFieldsException;
 import com.cyosp.ids.model.Directory;
 import com.cyosp.ids.model.FileSystemElement;
 import com.cyosp.ids.model.Image;
+import com.cyosp.ids.model.ImageMetadata;
 import com.cyosp.ids.model.User;
 import com.cyosp.ids.repository.UserRepository;
 import com.cyosp.ids.service.ModelService;
@@ -95,7 +96,7 @@ public class GraphQLDataFetchers {
 
     @EventListener(ApplicationReadyEvent.class)
     public void loadPreviewDirectory() {
-        if(idsConfiguration.isStaticPreviewDirectory()) {
+        if (idsConfiguration.isStaticPreviewDirectory()) {
             list(null, true, false, false);
             previewDirectoryLoaded = true;
         }
@@ -146,9 +147,9 @@ public class GraphQLDataFetchers {
                 .forEach(path -> {
                     Directory directory = modelService.directoryFrom(path);
                     Image preview = null;
-                    if(idsConfiguration.isStaticPreviewDirectory()) {
+                    if (idsConfiguration.isStaticPreviewDirectory()) {
                         String directoryId = directory.getId();
-                        if(previewDirectoryLoaded) {
+                        if (previewDirectoryLoaded) {
                             preview = (previewDirectoryReversedOrder ? previewDirectoryReversedOrderMap
                                     : previewDirectoryNaturalOrderMap).get(directoryId);
                         } else {
@@ -157,7 +158,7 @@ public class GraphQLDataFetchers {
                             previewDirectoryReversedOrderMap.put(directoryId,  preview(directory, true));
                         }
                     } else {
-                       preview = preview(directory, previewDirectoryReversedOrder);
+                        preview = preview(directory, previewDirectoryReversedOrder);
                     }
                     directory.setPreview(preview);
                     fileSystemElements.add(directory);
@@ -243,6 +244,10 @@ public class GraphQLDataFetchers {
 
             return asList(null, null, null);
         };
+    }
+
+    public DataFetcher<ImageMetadata> getImageMetadata() {
+        return dataFetchingEnvironment -> ImageMetadata.from(dataFetchingEnvironment.getSource());
     }
 
     public DataFetcher<List<FileSystemElement>> getDirectoryElementsDataFetcher() {
