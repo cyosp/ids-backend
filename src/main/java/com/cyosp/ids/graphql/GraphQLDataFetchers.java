@@ -4,6 +4,7 @@ import com.cyosp.ids.configuration.IdsConfiguration;
 import com.cyosp.ids.graphql.exception.BadCredentialsException;
 import com.cyosp.ids.graphql.exception.ImageDoesntExistException;
 import com.cyosp.ids.graphql.exception.SameFieldsException;
+import com.cyosp.ids.graphql.exception.ForbiddenException;
 import com.cyosp.ids.model.Directory;
 import com.cyosp.ids.model.FileSystemElement;
 import com.cyosp.ids.model.Image;
@@ -378,18 +379,22 @@ public class GraphQLDataFetchers {
 
     public DataFetcher<User> changePassword() {
         return dataFetchingEnvironment -> {
-            String password = dataFetchingEnvironment.getArgument(PASSWORD);
-            authenticateTokenizedUserWith(password);
+            if(idsConfiguration.isPasswordChangeAllowed()) {
+                String password = dataFetchingEnvironment.getArgument(PASSWORD);
+                authenticateTokenizedUserWith(password);
 
-            String newPassword = dataFetchingEnvironment.getArgument(NEW_PASSWORD);
-            if (password.equals(newPassword)) {
-                throw new SameFieldsException("Passwords are same");
+                String newPassword = dataFetchingEnvironment.getArgument(NEW_PASSWORD);
+                if (password.equals(newPassword)) {
+                    throw new SameFieldsException("Passwords are same");
+                }
+
+                User user = userRepository.getByEmail(getContext().getAuthentication().getName());
+                user.setPassword(newPassword);
+                user.setHashedPassword(passwordService.encode(user.getPassword()));
+                return userRepository.save(user);
+            } else {
+                throw new ForbiddenException("Password change not allowed");
             }
-
-            User user = userRepository.getByEmail(getContext().getAuthentication().getName());
-            user.setPassword(newPassword);
-            user.setHashedPassword(passwordService.encode(user.getPassword()));
-            return userRepository.save(user);
         };
     }
 

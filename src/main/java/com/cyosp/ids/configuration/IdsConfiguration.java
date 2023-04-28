@@ -21,6 +21,8 @@ import static org.tomlj.Toml.parse;
 @Component
 public class IdsConfiguration {
     @VisibleForTesting
+    static final String GENERAL_PASSWORD_CHANGE_ALLOWED = "general.password-change-allowed";
+    @VisibleForTesting
     static final String IMAGES_PUBLIC_SHARE_PROPERTY = "images.public-share";
     @VisibleForTesting
     static final String IMAGES_STATIC_PREVIEW_DIRECTORY_PROPERTY = "images.static-preview-directory";
@@ -44,6 +46,11 @@ public class IdsConfiguration {
             errors.forEach(error -> log.error(error.toString()));
             throw new RuntimeException("Fail to load configuration file: " + CONFIGURATION_FILE_NAME);
         }
+    }
+
+    public boolean isPasswordChangeAllowed() {
+        Boolean generalPasswordChangeAllowed = tomlParseResult.getBoolean(GENERAL_PASSWORD_CHANGE_ALLOWED);
+        return isNull(generalPasswordChangeAllowed) ? TRUE : TRUE.equals(generalPasswordChangeAllowed);
     }
 
     public String getAbsoluteImagesDirectory() {

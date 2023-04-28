@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.tomlj.TomlParseResult;
 
+import static com.cyosp.ids.configuration.IdsConfiguration.GENERAL_PASSWORD_CHANGE_ALLOWED;
 import static com.cyosp.ids.configuration.IdsConfiguration.IMAGES_PUBLIC_SHARE_PROPERTY;
 import static com.cyosp.ids.configuration.IdsConfiguration.IMAGES_STATIC_PREVIEW_DIRECTORY_PROPERTY;
 import static com.cyosp.ids.configuration.IdsConfiguration.SIGNUP_USER_PROPERTY;
@@ -21,6 +22,33 @@ class IdsConfigurationTest {
 
     @InjectMocks
     private IdsConfiguration idsConfiguration;
+
+    @Test
+    void isPasswordChangeAllowed_propertyNotDefined() {
+        doReturn(null)
+                .when(tomlParseResult)
+                .getBoolean(GENERAL_PASSWORD_CHANGE_ALLOWED);
+
+        assertTrue(idsConfiguration.isPasswordChangeAllowed());
+    }
+
+    @Test
+    void isPasswordChangeAllowed_propertySetToTrue() {
+        doReturn(true)
+                .when(tomlParseResult)
+                .getBoolean(GENERAL_PASSWORD_CHANGE_ALLOWED);
+
+        assertTrue(idsConfiguration.isPasswordChangeAllowed());
+    }
+
+    @Test
+    void isPasswordChangeAllowed_propertySetToFalse() {
+        doReturn(false)
+                .when(tomlParseResult)
+                .getBoolean(GENERAL_PASSWORD_CHANGE_ALLOWED);
+
+        assertFalse(idsConfiguration.isPasswordChangeAllowed());
+    }
 
     @Test
     void userCanSignup_propertyNotDefined() {

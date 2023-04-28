@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 6.1.0 (2023-04-28)
+ * Add configuration flag to restrict password change
+
 ##### 6.0.0 (2022-05-14)
  * Move getImage GraphQL query to getImages
  * Add getImage GraphQL query

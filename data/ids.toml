@@ -1,3 +1,6 @@
+[general]
+password-change-allowed=true
+
 [images]
 directory="."
 public-share=false
