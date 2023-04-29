@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 7.0.0 (2023-04-29)
+ * Add endpoint to download directory images
+
 ##### 6.1.0 (2023-04-28)
  * Add configuration flag to restrict password change
 
