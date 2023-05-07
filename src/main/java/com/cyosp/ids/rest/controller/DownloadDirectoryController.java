@@ -39,7 +39,7 @@ public class DownloadDirectoryController {
     private final ModelService modelService;
 
     @GetMapping(path = "**")
-    public void download(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void download(HttpServletRequest request, HttpServletResponse response) {
         String fullPathUrlEncoded = request.getRequestURL().toString().split(DOWNLOAD_PATH)[1];
         String fullPath = decode(fullPathUrlEncoded, UTF_8);
         log.info("Download asked: " + fullPath);
