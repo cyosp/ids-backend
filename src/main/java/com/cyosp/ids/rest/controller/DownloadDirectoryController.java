@@ -2,6 +2,7 @@ package com.cyosp.ids.rest.controller;
 
 import com.cyosp.ids.configuration.IdsConfiguration;
 import com.cyosp.ids.service.ModelService;
+import com.cyosp.ids.service.SecurityService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +38,7 @@ public class DownloadDirectoryController {
 
     private final IdsConfiguration idsConfiguration;
     private final ModelService modelService;
+    private final SecurityService securityService;
 
     @GetMapping(path = "**")
     public void download(HttpServletRequest request, HttpServletResponse response) {
@@ -49,6 +51,7 @@ public class DownloadDirectoryController {
             throw new IllegalStateException("Missing extension: " + downloadExtension);
         }
         String directoryPath = fullPath.substring(0, fullPath.lastIndexOf(downloadExtension));
+        securityService.checkAccessAllowed(directoryPath);
 
         Path absoluteDirectoryPath = get(idsConfiguration.getAbsoluteImagesDirectory(), separator, directoryPath);
         if (!exists(absoluteDirectoryPath) || !isDirectory(absoluteDirectoryPath)) {
