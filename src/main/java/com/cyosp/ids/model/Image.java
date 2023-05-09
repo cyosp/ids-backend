@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.File;
 
@@ -15,6 +16,7 @@ import static lombok.AccessLevel.PRIVATE;
 @Data
 @Setter(value = NONE)
 @Builder(access = PRIVATE)
+@ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class Image extends FileSystemElement {
     public static final String IMAGES_URL_PATH_PREFIX = "/images/";
