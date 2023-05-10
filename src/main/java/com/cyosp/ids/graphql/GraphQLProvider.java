@@ -12,6 +12,7 @@ import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -26,17 +27,25 @@ import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Component
+@RequiredArgsConstructor
 public class GraphQLProvider {
+    public  static final String IMAGE = "image";
+
+    static final String DIRECTORY_REVERSED_ORDER = "directoryReversedOrder";
+    static final String PREVIEW_DIRECTORY_REVERSED_ORDER = "previewDirectoryReversedOrder";
+    static final String DIRECTORY = "directory";
+    static final String FORCE_THUMBNAIL_GENERATION = "forceThumbnailGeneration";
+    static final String PASSWORD = "password";
+    static final String NEW_PASSWORD = "newPassword";
+
     private static final String QUERY = "Query";
     private static final String MUTATION = "Mutation";
 
-    private final GraphQLDataFetchers graphQLDataFetchers;
+    private final TypeDataFetcher typeDataFetcher;
+    private final QueryDataFetcher queryDataFetcher;
+    private final MutationDataFetcher mutationDataFetcher;
 
     private GraphQL graphQL;
-
-    GraphQLProvider(GraphQLDataFetchers graphQLDataFetchers) {
-        this.graphQLDataFetchers = graphQLDataFetchers;
-    }
 
     @PostConstruct
     public void init() throws IOException {
@@ -71,23 +80,23 @@ public class GraphQLProvider {
                 .type(FileSystemElement.class.getSimpleName(),
                         typeWriting -> typeWriting.typeResolver(fileSystemElementTypeResolver))
                 .type(newTypeWiring(Image.class.getSimpleName())
-                        .dataFetcher("metadata", graphQLDataFetchers.getImageMetadata()))
+                        .dataFetcher("metadata", typeDataFetcher.getImageMetadata()))
                 .type(newTypeWiring(Directory.class.getSimpleName())
-                        .dataFetcher("elements", graphQLDataFetchers.getDirectoryElementsDataFetcher()))
+                        .dataFetcher("elements", typeDataFetcher.getDirectoryElementsDataFetcher()))
                 .type(newTypeWiring(QUERY)
-                        .dataFetcher("list", graphQLDataFetchers.getFileSystemElementsDataFetcher()))
+                        .dataFetcher("list", queryDataFetcher.getFileSystemElementsDataFetcher()))
                 .type(newTypeWiring(QUERY)
-                        .dataFetcher("getImages", graphQLDataFetchers.getImages()))
+                        .dataFetcher("getImages", queryDataFetcher.getImages()))
                 .type(newTypeWiring(QUERY)
-                        .dataFetcher("getImage", graphQLDataFetchers.getImage()))
+                        .dataFetcher("getImage", queryDataFetcher.getImage()))
                 .type(newTypeWiring(QUERY)
-                        .dataFetcher("users", graphQLDataFetchers.getUsersDataFetcher()))
+                        .dataFetcher("users", queryDataFetcher.getUsersDataFetcher()))
                 .type(newTypeWiring(MUTATION)
-                        .dataFetcher("generateAlternativeFormats", graphQLDataFetchers.generateAlternativeFormats()))
+                        .dataFetcher("generateAlternativeFormats", mutationDataFetcher.generateAlternativeFormats()))
                 .type(newTypeWiring(MUTATION)
-                        .dataFetcher("changePassword", graphQLDataFetchers.changePassword()))
+                        .dataFetcher("changePassword", mutationDataFetcher.changePassword()))
                 .type(newTypeWiring(MUTATION)
-                        .dataFetcher("deleteImage", graphQLDataFetchers.deleteImage()))
+                        .dataFetcher("deleteImage", mutationDataFetcher.deleteImage()))
                 .build();
     }
 

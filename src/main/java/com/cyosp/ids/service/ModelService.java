@@ -4,11 +4,14 @@ import com.cyosp.ids.configuration.IdsConfiguration;
 import com.cyosp.ids.model.Directory;
 import com.cyosp.ids.model.FileSystemElement;
 import com.cyosp.ids.model.Image;
+import graphql.schema.DataFetchingEnvironment;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
+import static com.cyosp.ids.graphql.GraphQLProvider.IMAGE;
 import static java.io.File.separator;
 
 @Service
@@ -61,5 +64,11 @@ public class ModelService {
 
     public Directory directoryFrom(Path path) {
         return new Directory(idsConfiguration.getAbsoluteImagesDirectory(), relative(path));
+    }
+
+    public Image getImage(DataFetchingEnvironment dataFetchingEnvironment) {
+        String imageId = dataFetchingEnvironment.getArgument(IMAGE).toString();
+        Path absoluteImagePath = Paths.get(idsConfiguration.getAbsoluteImagesDirectory(), separator, imageId);
+        return imageFrom(absoluteImagePath);
     }
 }

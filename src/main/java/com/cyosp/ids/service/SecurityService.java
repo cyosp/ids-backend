@@ -5,6 +5,7 @@ import com.google.common.annotations.VisibleForTesting;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.cyosp.ids.model.Image.IDS_HIDDEN_DIRECTORY;
+import static com.cyosp.ids.model.Role.ADMINISTRATOR;
 import static java.io.File.separator;
 import static java.lang.String.format;
 import static java.util.Collections.reverse;
@@ -64,5 +66,12 @@ public class SecurityService {
             log.info(format("[%s] %s", getContext().getAuthentication().getName(), message));
             throw new AccessDeniedException(message);
         }
+    }
+
+    public void checkAdministratorUser() throws java.nio.file.AccessDeniedException {
+        if (getContext().getAuthentication().getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .noneMatch(authority -> ADMINISTRATOR.name().equals(authority)))
+            throw new java.nio.file.AccessDeniedException("Only administrator user is allowed");
     }
 }
