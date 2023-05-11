@@ -4,6 +4,7 @@ import com.cyosp.ids.configuration.IdsConfiguration;
 import com.cyosp.ids.model.Directory;
 import com.cyosp.ids.model.FileSystemElement;
 import com.cyosp.ids.model.Image;
+import com.google.common.annotations.VisibleForTesting;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,8 +35,8 @@ import static java.util.stream.Collectors.toList;
 @RequiredArgsConstructor
 public class FileSystemElementService {
     private final IdsConfiguration idsConfiguration;
-
     private final ModelService modelService;
+    private final SecurityService securityService;
 
     private final Map<String, Image> previewDirectoryNaturalOrderMap = new HashMap<>();
     private final Map<String, Image> previewDirectoryReversedOrderMap = new HashMap<>();
@@ -105,9 +107,8 @@ public class FileSystemElementService {
                         .orElse(null));
     }
 
-    private List<FileSystemElement> list(String directoryString, boolean recursive, boolean directoryReversedOrder, boolean previewDirectoryReversedOrder) {
-        final List<FileSystemElement> fileSystemElements = new ArrayList<>();
-
+    @VisibleForTesting
+    List<Path> getUnorderedPaths(String directoryString) {
         List<Path> unorderedPaths = new ArrayList<>();
         try (DirectoryStream<Path> paths = newDirectoryStream(get(getAbsoluteDirectoryPath(directoryString)),
                 path -> modelService.isImage(path) || modelService.isDirectory(path))) {
@@ -115,12 +116,25 @@ public class FileSystemElementService {
         } catch (IOException e) {
             log.warn("Fail to list file system elements: " + e.getMessage());
         }
+        return unorderedPaths;
+    }
+
+    private Comparator<FileSystemElement> byName() {
+        return comparing(FileSystemElement::getName);
+    }
+
+    @VisibleForTesting
+    List<FileSystemElement> list(String directoryString, boolean recursive, boolean directoryReversedOrder, boolean previewDirectoryReversedOrder) {
+        final List<FileSystemElement> fileSystemElements = new ArrayList<>();
+
+        List<Path> unorderedPaths = getUnorderedPaths(directoryString);
+
         unorderedPaths.stream()
                 .filter(modelService::isDirectory)
-                .sorted(comparing(path -> path.getFileName().toString()))
-                .sorted(directoryReversedOrder ? reverseOrder() : naturalOrder())
-                .forEach(path -> {
-                    Directory directory = modelService.directoryFrom(path);
+                .map(modelService::directoryFrom)
+                .filter(securityService::isAccessAllowed)
+                .sorted(directoryReversedOrder ? byName().reversed() : byName())
+                .forEach(directory -> {
                     Image preview = null;
                     if (idsConfiguration.isStaticPreviewDirectory()) {
                         String directoryId = directory.getId();
@@ -138,13 +152,16 @@ public class FileSystemElementService {
                     directory.setPreview(preview);
                     fileSystemElements.add(directory);
                     if (recursive) {
-                        fileSystemElements.addAll(listRecursively(modelService.stringRelative(path), directoryReversedOrder, previewDirectoryReversedOrder));
+                        fileSystemElements.addAll(listRecursively(modelService.stringRelative(directory), directoryReversedOrder, previewDirectoryReversedOrder));
                     }
                 });
+
         unorderedPaths.stream()
                 .filter(modelService::isImage)
-                .sorted(comparing(path -> path.getFileName().toString()))
-                .forEach(path -> fileSystemElements.add(modelService.imageFrom(path)));
+                .map(modelService::imageFrom)
+                .filter(securityService::isAccessAllowed)
+                .sorted(byName())
+                .forEach(fileSystemElements::add);
 
         return fileSystemElements;
     }
