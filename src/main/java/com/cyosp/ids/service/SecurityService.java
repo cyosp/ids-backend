@@ -1,6 +1,7 @@
 package com.cyosp.ids.service;
 
 import com.cyosp.ids.configuration.IdsConfiguration;
+import com.cyosp.ids.model.FileSystemElement;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +59,10 @@ public class SecurityService {
             }
         }
         return true;
+    }
+
+    public boolean isAccessAllowed(FileSystemElement fileSystemElement) {
+        return isAccessAllowed(fileSystemElement.getId());
     }
 
     public void checkAccessAllowed(String fileSystemElementId) {

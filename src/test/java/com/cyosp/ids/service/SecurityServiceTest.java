@@ -1,6 +1,7 @@
 package com.cyosp.ids.service;
 
 import com.cyosp.ids.configuration.IdsConfiguration;
+import com.cyosp.ids.model.Directory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -107,6 +108,19 @@ class SecurityServiceTest {
         setAuthentication(login);
 
         assertEquals(expectedIsAccessAllowed, securityService.isAccessAllowed(rootDirectory));
+    }
+
+    @Test
+    void isAccessAllowed() {
+        String relativePath = "a/b/c";
+        Directory directory = new Directory(null, new File(relativePath));
+
+        boolean isAccessAllowed = true;
+        doReturn(isAccessAllowed)
+                .when(securityService)
+                .isAccessAllowed(relativePath);
+
+        assertEquals(isAccessAllowed, securityService.isAccessAllowed(directory));
     }
 
     @Test

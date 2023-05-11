@@ -35,7 +35,7 @@ public class TypeDataFetcher {
     public DataFetcher<List<FileSystemElement>> getDirectoryElementsDataFetcher() {
         return dataFetchingEnvironment -> {
             Directory directory = dataFetchingEnvironment.getSource();
-            if (securityService.isAccessAllowed(directory.getId())) {
+            if (securityService.isAccessAllowed(directory)) {
                 GraphQLContext graphQLContext = dataFetchingEnvironment.getContext();
 
                 boolean directoryReversedOrder = TRUE.equals(graphQLContext.get(DIRECTORY_REVERSED_ORDER));
