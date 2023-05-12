@@ -32,16 +32,14 @@ import static java.util.Objects.nonNull;
 @RequiredArgsConstructor
 public class QueryDataFetcher {
     private final UserRepository userRepository;
-
     private final ModelService modelService;
-
     private final FileSystemElementService fileSystemElementService;
-
     private final SecurityService securityService;
 
     public DataFetcher<List<FileSystemElement>> getFileSystemElementsDataFetcher() {
         return dataFetchingEnvironment -> {
             String directory = dataFetchingEnvironment.getArgument(DIRECTORY);
+            securityService.checkAccessAllowed(directory);
 
             GraphQLContext graphQLContext = dataFetchingEnvironment.getContext();
 
@@ -56,12 +54,19 @@ public class QueryDataFetcher {
     }
 
     public DataFetcher<Image> getImage() {
-        return modelService::getImage;
+        return dataFetchingEnvironment -> {
+            Image image = modelService.getImage(dataFetchingEnvironment);
+            securityService.checkAccessAllowed(image);
+            return image;
+        };
     }
 
     public DataFetcher<List<Image>> getImages() {
         return dataFetchingEnvironment -> {
-            Iterator<Path> pathIterator = Files.list(get(fileSystemElementService.getAbsoluteDirectoryPath(dataFetchingEnvironment.getArgument(DIRECTORY))))
+            String directory = dataFetchingEnvironment.getArgument(DIRECTORY);
+            securityService.checkAccessAllowed(directory);
+
+            Iterator<Path> pathIterator = Files.list(get(fileSystemElementService.getAbsoluteDirectoryPath(directory)))
                     .filter(modelService::isImage)
                     .sorted(comparing(path -> path.getFileName().toString()))
                     .iterator();

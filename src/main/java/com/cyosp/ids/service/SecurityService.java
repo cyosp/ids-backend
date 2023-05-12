@@ -35,9 +35,11 @@ public class SecurityService {
 
     @VisibleForTesting
     List<String> getDirectoryPaths(String relativeFile) {
+        String directory = nonNull(relativeFile) ? relativeFile : "";
+
         List<String> directories = new ArrayList<>();
-        directories.add(relativeFile);
-        String parent = getParent(relativeFile);
+        directories.add(directory);
+        String parent = getParent(directory);
         while (nonNull(parent)) {
             directories.add(parent);
             parent = getParent(parent);

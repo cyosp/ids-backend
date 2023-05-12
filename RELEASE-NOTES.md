@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 8.0.0 (2023-05-12)
+ * Directory access can be restricted by login
+
 ##### 7.0.0 (2023-04-29)
  * Add endpoint to download directory images
 

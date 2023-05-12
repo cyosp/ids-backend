@@ -67,6 +67,22 @@ class SecurityServiceTest {
     }
 
     @Test
+    void getDirectoryPaths_null() {
+        List<String> directories = securityService.getDirectoryPaths(null);
+
+        assertEquals(1, directories.size());
+        assertEquals("", directories.get(0));
+    }
+
+    @Test
+    void getDirectoryPaths_empty() {
+        List<String> directories = securityService.getDirectoryPaths("");
+
+        assertEquals(1, directories.size());
+        assertEquals("", directories.get(0));
+    }
+
+    @Test
     void getDirectoryPaths() {
         List<String> directories = securityService.getDirectoryPaths("a/b/c");
 
