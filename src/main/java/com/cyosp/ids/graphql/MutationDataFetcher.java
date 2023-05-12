@@ -67,7 +67,7 @@ public class MutationDataFetcher {
 
     private final SecurityService securityService;
 
-    BufferedImage createPreview(BufferedImage bufferedImage) {
+    private BufferedImage createPreview(BufferedImage bufferedImage) {
         int previewImageWidth;
         int previewImageHeight;
         final int previewMaximumSize = 1080;
@@ -82,7 +82,7 @@ public class MutationDataFetcher {
         return resize(bufferedImage, previewImageWidth, previewImageHeight);
     }
 
-    BufferedImage createThumbnail(BufferedImage bufferedImage) {
+    private BufferedImage createThumbnail(BufferedImage bufferedImage) {
         int imageWidth = bufferedImage.getWidth();
         int imageHeight = bufferedImage.getHeight();
 
@@ -104,7 +104,7 @@ public class MutationDataFetcher {
         return thumbnailImage;
     }
 
-    void save(BufferedImage bufferedImage, File file) throws IOException {
+    private void save(BufferedImage bufferedImage, File file) throws IOException {
         createDirectories(get(file.getParent()));
 
         String filename = file.getName();
