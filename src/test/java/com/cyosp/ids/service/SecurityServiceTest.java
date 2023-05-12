@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.springframework.security.core.context.SecurityContextHolder.getContext;
 import static org.springframework.util.FileSystemUtils.deleteRecursively;
@@ -145,5 +146,18 @@ class SecurityServiceTest {
         setAuthentication("login#2");
 
         assertThrows(AccessDeniedException.class, () -> securityService.checkAccessAllowed(fileSystemElementId));
+    }
+
+    @Test
+    void checkAccessAllowed() {
+        String relativePath = "aaa/bbb/ccc";
+        Directory directory = new Directory(null, new File(relativePath));
+
+        Class<AccessDeniedException> accessDeniedExceptionClass = AccessDeniedException.class;
+        doThrow(accessDeniedExceptionClass)
+                .when(securityService)
+                .checkAccessAllowed(relativePath);
+
+        assertThrows(accessDeniedExceptionClass, () -> securityService.checkAccessAllowed(directory));
     }
 }

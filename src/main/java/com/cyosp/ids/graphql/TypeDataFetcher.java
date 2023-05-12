@@ -27,7 +27,7 @@ public class TypeDataFetcher {
     public DataFetcher<ImageMetadata> getImageMetadata() {
         return dataFetchingEnvironment -> {
             Image image = dataFetchingEnvironment.getSource();
-            securityService.checkAccessAllowed(image.getId());
+            securityService.checkAccessAllowed(image);
             return ImageMetadata.from(image);
         };
     }

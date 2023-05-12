@@ -73,6 +73,10 @@ public class SecurityService {
         }
     }
 
+    public void checkAccessAllowed(FileSystemElement fileSystemElement) {
+        checkAccessAllowed(fileSystemElement.getId());
+    }
+
     public void checkAdministratorUser() throws java.nio.file.AccessDeniedException {
         if (getContext().getAuthentication().getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
