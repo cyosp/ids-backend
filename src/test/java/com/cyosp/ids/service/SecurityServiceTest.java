@@ -11,8 +11,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -31,7 +31,9 @@ import static java.util.List.of;
 import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
@@ -62,6 +64,60 @@ class SecurityServiceTest {
     }
 
     @Test
+    void hasAuthentication_no() {
+        getContext().setAuthentication(null);
+
+        assertFalse(securityService.hasAuthentication());
+    }
+
+    @Test
+    void hasAuthentication_yes() {
+        setAuthenticatedUser("login#0");
+
+        assertTrue(securityService.hasAuthentication());
+    }
+
+    @Test
+    void isAnonymousUser_no() {
+        setAuthenticatedUser("login#1");
+
+        assertFalse(securityService.isAnonymousUser());
+    }
+
+    private void setAnonymousUser() {
+        Collection<GrantedAuthority> grantedAuthorities = of(new SimpleGrantedAuthority("A_ROLE_VALUE"));
+        User principal = new User("a_login", "a_password", grantedAuthorities);
+        getContext().setAuthentication(new AnonymousAuthenticationToken("a_key", principal, grantedAuthorities));
+    }
+
+    @Test
+    void isAnonymousUser_yes() {
+        setAnonymousUser();
+
+        assertTrue(securityService.isAnonymousUser());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "false,,false",
+            "true,false,true",
+            "true,true,false"
+    })
+    void needAccessCheck(boolean hasAuthentication, Boolean isAnonymousUser, boolean expectedNeedAccessCheck) {
+        doReturn(hasAuthentication)
+                .when(securityService)
+                .hasAuthentication();
+
+        if (nonNull(isAnonymousUser)) {
+            doReturn(isAnonymousUser)
+                    .when(securityService)
+                    .isAnonymousUser();
+        }
+
+        assertEquals(expectedNeedAccessCheck, securityService.needAccessCheck());
+    }
+
+    @Test
     void getParent() {
         assertEquals("/a/b", securityService.getParent("/a/b/c"));
     }
@@ -89,11 +145,19 @@ class SecurityServiceTest {
         assertEquals(asList("a", "a/b", "a/b/c"), directories);
     }
 
-    private void setAuthentication(String login) {
+    private void setAuthenticatedUser(String login) {
         Collection<GrantedAuthority> grantedAuthorities = of(new SimpleGrantedAuthority("ROLE"));
         User principal = new User(login, "password", grantedAuthorities);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(principal, null, grantedAuthorities);
-        getContext().setAuthentication(authentication);
+        getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal, null, grantedAuthorities));
+    }
+
+    @Test
+    void isAccessAllowed_dontNeedAccessCheck() {
+        doReturn(false)
+                .when(securityService)
+                .needAccessCheck();
+
+        assertTrue(securityService.isAccessAllowed("a/b"));
     }
 
     @ParameterizedTest
@@ -101,7 +165,11 @@ class SecurityServiceTest {
             "true,false",
             "false,true"
     })
-    void isAccessAllowed(boolean createDeniedFile, boolean expectedIsAccessAllowed) throws IOException {
+    void isAccessAllowed_needAccessCheck(boolean createDeniedFile, boolean expectedIsAccessAllowed) throws IOException {
+        doReturn(true)
+                .when(securityService)
+                .needAccessCheck();
+
         String tmpdir = getProperty("java.io.tmpdir");
         doReturn(tmpdir)
                 .when(idsConfiguration)
@@ -113,7 +181,7 @@ class SecurityServiceTest {
         String idsHiddenDirectory = temporaryBaseDirectory + separator + ".ids";
         createDirectories(get(idsHiddenDirectory));
 
-        String login = "login#1";
+        String login = "login#2";
         if (createDeniedFile && !new File(idsHiddenDirectory + separator + "access.denied." + login).createNewFile()) {
             throw new RuntimeException("Fail to create access denied file");
         }
@@ -122,7 +190,7 @@ class SecurityServiceTest {
                 .when(securityService)
                 .getDirectoryPaths(rootDirectory);
 
-        setAuthentication(login);
+        setAuthenticatedUser(login);
 
         assertEquals(expectedIsAccessAllowed, securityService.isAccessAllowed(rootDirectory));
     }
@@ -159,7 +227,7 @@ class SecurityServiceTest {
                 .when(securityService)
                 .isAccessAllowed(fileSystemElementId);
 
-        setAuthentication("login#2");
+        setAuthenticatedUser("login#3");
 
         assertThrows(AccessDeniedException.class, () -> securityService.checkAccessAllowed(fileSystemElementId));
     }

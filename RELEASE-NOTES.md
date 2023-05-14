@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 8.0.1 (2023-05-14)
+ * Fix: Application startup when static preview directory is enabled
+
 ##### 8.0.0 (2023-05-12)
  * Directory access can be restricted by login
 

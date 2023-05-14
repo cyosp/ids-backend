@@ -6,6 +6,7 @@ import com.google.common.annotations.VisibleForTesting;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,21 @@ import static org.springframework.security.core.context.SecurityContextHolder.ge
 @RequiredArgsConstructor
 public class SecurityService {
     private final IdsConfiguration idsConfiguration;
+
+    @VisibleForTesting
+    boolean hasAuthentication() {
+        return nonNull(getContext().getAuthentication());
+    }
+
+    @VisibleForTesting
+    boolean isAnonymousUser() {
+        return getContext().getAuthentication() instanceof AnonymousAuthenticationToken;
+    }
+
+    @VisibleForTesting
+    boolean needAccessCheck() {
+        return hasAuthentication() && !isAnonymousUser();
+    }
 
     @VisibleForTesting
     String getParent(String relativeFile) {
@@ -49,15 +65,17 @@ public class SecurityService {
     }
 
     public boolean isAccessAllowed(String fileSystemElementId) {
-        String login = getContext().getAuthentication().getName();
-        log.info(format("[%s] Check access: %s", login, fileSystemElementId));
-        for (String directoryPath : getDirectoryPaths(fileSystemElementId)) {
-            File accessDeniedFile = new File(idsConfiguration.getAbsoluteImagesDirectory()
-                    + separator + directoryPath
-                    + separator + IDS_HIDDEN_DIRECTORY
-                    + separator + "access.denied." + login);
-            if (accessDeniedFile.exists()) {
-                return false;
+        if (needAccessCheck()) {
+            String login = getContext().getAuthentication().getName();
+            log.info(format("[%s] Check access: %s", login, fileSystemElementId));
+            for (String directoryPath : getDirectoryPaths(fileSystemElementId)) {
+                File accessDeniedFile = new File(idsConfiguration.getAbsoluteImagesDirectory()
+                        + separator + directoryPath
+                        + separator + IDS_HIDDEN_DIRECTORY
+                        + separator + "access.denied." + login);
+                if (accessDeniedFile.exists()) {
+                    return false;
+                }
             }
         }
         return true;

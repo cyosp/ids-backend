@@ -36,14 +36,14 @@ class TypeDataFetcherTest {
 
     @Test
     void getImageMetadata_accessDenied() {
-        String relativePath = "a/b/c/d.jpg";
-        doReturn(Image.from("/absolute-images-directory", new File(relativePath)))
+        Image image = Image.from("/absolute-images-directory", new File("a/b/c/d.jpg"));
+        doReturn(image)
                 .when(dataFetchingEnvironment)
                 .getSource();
 
         doThrow(AccessDeniedException.class)
                 .when(securityService)
-                .checkAccessAllowed(relativePath);
+                .checkAccessAllowed(image);
 
         DataFetcher<ImageMetadata> imageMetadataDataFetcher = typeDataFetcher.getImageMetadata();
 
@@ -52,14 +52,14 @@ class TypeDataFetcherTest {
 
     @Test
     void getDirectoryElementsDataFetcher_accessDenied() throws Exception {
-        String relativePath = "a/b/c";
-        doReturn(new Directory("/absolute-images-directory", new File(relativePath)))
+        Directory directory = new Directory("/absolute-images-directory", new File("a/b/c"));
+        doReturn(directory)
                 .when(dataFetchingEnvironment)
                 .getSource();
 
         doReturn(false)
                 .when(securityService)
-                .isAccessAllowed(relativePath);
+                .isAccessAllowed(directory);
 
         DataFetcher<List<FileSystemElement>> fileSystemElementsDataFetcher = typeDataFetcher.getDirectoryElementsDataFetcher();
 
