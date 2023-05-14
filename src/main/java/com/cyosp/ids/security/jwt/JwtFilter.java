@@ -29,12 +29,15 @@ public class JwtFilter extends GenericFilterBean {
         String jwt = extractToken(httpServletRequest);
         String requestURI = httpServletRequest.getRequestURI();
 
-        if (hasText(jwt) && jwtTokenProvider.isValid(jwt)) {
-            Authentication authentication = jwtTokenProvider.getAuthentication(jwt);
-            getContext().setAuthentication(authentication);
-            log.info("Set authentication to security context for {} and uri: {}", authentication.getName(), requestURI);
-        } else
-            log.info("No valid JWT token found for uri: {}", requestURI);
+        if (hasText(jwt)) {
+            if (jwtTokenProvider.isValid(jwt)) {
+                Authentication authentication = jwtTokenProvider.getAuthentication(jwt);
+                getContext().setAuthentication(authentication);
+                log.info("Set authentication to security context for {} and uri: {}", authentication.getName(), requestURI);
+            } else {
+                log.info("No valid JWT token found for uri: {}", requestURI);
+            }
+        }
 
         filterChain.doFilter(servletRequest, servletResponse);
     }
