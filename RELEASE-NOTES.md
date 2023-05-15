@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 8.1.0 (2023-05-15)
+ * Add metric on static preview directory
+
 ##### 8.0.1 (2023-05-14)
  * Fix: Application startup when static preview directory is enabled
 

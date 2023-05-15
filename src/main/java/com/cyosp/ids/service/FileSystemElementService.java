@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static java.io.File.separator;
+import static java.lang.String.format;
 import static java.nio.file.Files.newDirectoryStream;
 import static java.nio.file.Paths.get;
 import static java.util.Comparator.comparing;
@@ -34,6 +36,7 @@ import static java.util.stream.Collectors.toList;
 @Service
 @RequiredArgsConstructor
 public class FileSystemElementService {
+    private final StopWatch stopWatch = new StopWatch();
     private final IdsConfiguration idsConfiguration;
     private final ModelService modelService;
     private final SecurityService securityService;
@@ -43,10 +46,14 @@ public class FileSystemElementService {
     private boolean previewDirectoryLoaded = false;
 
     @EventListener(ApplicationReadyEvent.class)
-    public void loadPreviewDirectory() {
+    public void loadStaticPreviewDirectory() {
         if (idsConfiguration.isStaticPreviewDirectory()) {
+            log.info("Static preview directory loading");
+            stopWatch.start();
             list(null, true, false, false);
+            stopWatch.stop();
             previewDirectoryLoaded = true;
+            log.info(format("Static preview directory loaded in %s ms", stopWatch.getTotalTimeMillis()));
         }
     }
 
