@@ -29,6 +29,9 @@ jobs:
         with:
           java-version: 11
 
+      - name: Run tests
+        run: ./gradlew test
+
       - name: Build IDS backend
         run: ./gradlew bootJar
 
