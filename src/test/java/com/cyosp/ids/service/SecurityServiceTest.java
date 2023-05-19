@@ -11,15 +11,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 
 import static java.io.File.separator;
@@ -47,11 +41,14 @@ class SecurityServiceTest {
 
     private SecurityService securityService;
 
+    private AuthenticationTestService authenticationTestService;
+
     private File temporaryBaseDirectory;
 
     @BeforeEach
     void beforeEach() {
         securityService = spy(new SecurityService(idsConfiguration));
+        authenticationTestService = new AuthenticationTestService();
     }
 
     @AfterEach
@@ -72,27 +69,21 @@ class SecurityServiceTest {
 
     @Test
     void hasAuthentication_yes() {
-        setAuthenticatedUser("login#0");
+        authenticationTestService.setAuthenticatedUser("login#0");
 
         assertTrue(securityService.hasAuthentication());
     }
 
     @Test
     void isAnonymousUser_no() {
-        setAuthenticatedUser("login#1");
+        authenticationTestService.setAuthenticatedUser("login#1");
 
         assertFalse(securityService.isAnonymousUser());
     }
 
-    private void setAnonymousUser() {
-        Collection<GrantedAuthority> grantedAuthorities = of(new SimpleGrantedAuthority("A_ROLE_VALUE"));
-        User principal = new User("a_login", "a_password", grantedAuthorities);
-        getContext().setAuthentication(new AnonymousAuthenticationToken("a_key", principal, grantedAuthorities));
-    }
-
     @Test
     void isAnonymousUser_yes() {
-        setAnonymousUser();
+        authenticationTestService.setAnonymousUser();
 
         assertTrue(securityService.isAnonymousUser());
     }
@@ -145,12 +136,6 @@ class SecurityServiceTest {
         assertEquals(asList("a", "a/b", "a/b/c"), directories);
     }
 
-    private void setAuthenticatedUser(String login) {
-        Collection<GrantedAuthority> grantedAuthorities = of(new SimpleGrantedAuthority("ROLE"));
-        User principal = new User(login, "password", grantedAuthorities);
-        getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal, null, grantedAuthorities));
-    }
-
     @Test
     void isAccessAllowed_dontNeedAccessCheck() {
         doReturn(false)
@@ -190,7 +175,7 @@ class SecurityServiceTest {
                 .when(securityService)
                 .getDirectoryPaths(rootDirectory);
 
-        setAuthenticatedUser(login);
+        authenticationTestService.setAuthenticatedUser(login);
 
         assertEquals(expectedIsAccessAllowed, securityService.isAccessAllowed(rootDirectory));
     }
@@ -227,7 +212,7 @@ class SecurityServiceTest {
                 .when(securityService)
                 .isAccessAllowed(fileSystemElementId);
 
-        setAuthenticatedUser("login#3");
+        authenticationTestService.setAuthenticatedUser("login#3");
 
         assertThrows(AccessDeniedException.class, () -> securityService.checkAccessAllowed(fileSystemElementId));
     }

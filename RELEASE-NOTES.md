@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 8.2.0 (2023-05-19)
+ * Password change can be restricted by login
+
 ##### 8.1.0 (2023-05-15)
  * Add metric on static preview directory
 

@@ -8,3 +8,6 @@ static-preview-directory=false
 
 [signup]
 user=true
+
+[users]
+password-change-denied = ["a-password-change@user.denied"]
