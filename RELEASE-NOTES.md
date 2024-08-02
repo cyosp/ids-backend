@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 8.3.0 (2024-08-02)
+ * Search taken date in picture info
+
 ##### 8.2.0 (2023-05-19)
  * Password change can be restricted by login
 
