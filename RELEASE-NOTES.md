@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 8.4.0 (2024-08-17)
+ * Extract taken date from Exif IFD0 group
+
 ##### 8.3.0 (2024-08-02)
  * Search taken date in picture info
 

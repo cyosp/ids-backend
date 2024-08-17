@@ -2,6 +2,7 @@ package com.cyosp.ids.model;
 
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifDirectoryBase;
+import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.google.common.annotations.VisibleForTesting;
 import com.twelvemonkeys.imageio.metadata.jpeg.JPEGSegment;
@@ -39,6 +40,8 @@ import static lombok.AccessLevel.PRIVATE;
 @NoArgsConstructor(access = PRIVATE)
 @AllArgsConstructor(access = PRIVATE)
 public class ImageMetadata {
+    private static final int TAG_MODIFY_DATE = 306;
+
     private String takenAt;
 
     private static LocalDateTime getLocalDateTime(String originalDatetime) {
@@ -51,15 +54,10 @@ public class ImageMetadata {
     }
 
     @VisibleForTesting
-    static LocalDateTime getTakenDateFromExif(Image image) {
-        try {
-            Metadata metadata = readMetadata(image.getFile());
-            ExifDirectoryBase exifDirectoryBase = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
-            if (nonNull(exifDirectoryBase)) {
-                return getLocalDateTime(exifDirectoryBase.getString(TAG_DATETIME_ORIGINAL));
-            }
-        } catch (Exception e) {
-            log.error("Fail to read image metadata: {}", e.getMessage());
+    static LocalDateTime getTakenDateFromExif(Metadata metadata) {
+        ExifDirectoryBase exifDirectoryBase = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
+        if (nonNull(exifDirectoryBase)) {
+            return getLocalDateTime(exifDirectoryBase.getString(TAG_DATETIME_ORIGINAL));
         }
         return null;
     }
@@ -94,17 +92,36 @@ public class ImageMetadata {
         return null;
     }
 
+    @VisibleForTesting
+    static LocalDateTime getTakenDateFromModifyDate(Metadata metadata) {
+        ExifDirectoryBase exifDirectoryBase = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+        if (nonNull(exifDirectoryBase)) {
+            return getLocalDateTime(exifDirectoryBase.getString(TAG_MODIFY_DATE));
+        }
+        return null;
+    }
+
     private static LocalDateTime getTakenDate(Image image) {
-        LocalDateTime takenDateFromExif = getTakenDateFromExif(image);
-        if (nonNull(takenDateFromExif)) {
-            return takenDateFromExif;
-        }
+        try {
+            Metadata metadata = readMetadata(image.getFile());
 
-        LocalDateTime takenDateFromPictureInfo = getTakenDateFromPictureInfo(image);
-        if (nonNull(takenDateFromPictureInfo)) {
-            return takenDateFromPictureInfo;
-        }
+            LocalDateTime takenDateFromExif = getTakenDateFromExif(metadata);
+            if (nonNull(takenDateFromExif)) {
+                return takenDateFromExif;
+            }
 
+            LocalDateTime takenDateFromPictureInfo = getTakenDateFromPictureInfo(image);
+            if (nonNull(takenDateFromPictureInfo)) {
+                return takenDateFromPictureInfo;
+            }
+
+            LocalDateTime takenDateFromModifyDate = getTakenDateFromModifyDate(metadata);
+            if (nonNull(takenDateFromModifyDate)) {
+                return takenDateFromModifyDate;
+            }
+        } catch (Exception e) {
+            log.error("Fail to read image metadata: {}", e.getMessage());
+        }
         return null;
     }
 
