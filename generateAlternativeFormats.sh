@@ -10,7 +10,7 @@ createThumbnail() {
   local THUMBNAIL_FILE_PATH="$IDS_DIR/$IMAGE_BASE_NAME.thumbnail.jpg"
   if [ ! -e "$THUMBNAIL_FILE_PATH" ]; then
     local SOURCE_FILE="$IDS_DIR/$IMAGE_BASE_NAME$PREVIEW_SUFFIX"
-    local IMAGE_SIZE=$(convert "$SOURCE_FILE" -print "%w %h" /dev/null)
+    local IMAGE_SIZE=$(magick identify -format "%w %h" "$SOURCE_FILE")
     local IMAGE_WIDTH=$(echo "$IMAGE_SIZE" | cut -d ' ' -f 1)
     local IMAGE_HEIGHT=$(echo "$IMAGE_SIZE" | cut -d ' ' -f 2)
     if [ $IMAGE_HEIGHT -gt $IMAGE_WIDTH ]; then
@@ -21,8 +21,8 @@ createThumbnail() {
       CROP="${IMAGE_HEIGHT}x${IMAGE_HEIGHT}+$START_CROP+0"
     fi
     echo "Start thumbnail generation"
-    convert "$SOURCE_FILE" -crop "$CROP" "$THUMBNAIL_FILE_PATH"
-    convert "$THUMBNAIL_FILE_PATH" -resize ${THUMBNAIL_SQUARE_SIZE}x${THUMBNAIL_SQUARE_SIZE} "$THUMBNAIL_FILE_PATH"
+    magick "$SOURCE_FILE" -crop "$CROP" "$THUMBNAIL_FILE_PATH"
+    magick "$THUMBNAIL_FILE_PATH" -resize ${THUMBNAIL_SQUARE_SIZE}x${THUMBNAIL_SQUARE_SIZE} "$THUMBNAIL_FILE_PATH"
     echo "Done"
   else
     echo "Thumbnail already exists"
@@ -32,13 +32,13 @@ createThumbnail() {
 createPreview() {
   local SOURCE_FILE="$IDS_DIR/$IMAGE_BASE_NAME$PREVIEW_SUFFIX"
   if [ ! -e "$SOURCE_FILE" ]; then
-    local IMAGE_SIZE=$(convert "$file" -print "%w %h" /dev/null)
+    local IMAGE_SIZE=$(magick identify -format "%w %h" "$file")
     local IMAGE_WIDTH=$(echo "$IMAGE_SIZE" | cut -d ' ' -f 1)
     local IMAGE_HEIGHT=$(echo "$IMAGE_SIZE" | cut -d ' ' -f 2)
     local IMAGE_RATIO=$(awk "BEGIN { print "$IMAGE_WIDTH/$IMAGE_HEIGHT" }")
     local PREVIEW_IMAGE_WIDTH=$(echo "$PREVIEW_MAX_SIZE*$IMAGE_RATIO/1" | bc)
     echo "Start preview generation"
-    convert "$file" -resize ${PREVIEW_IMAGE_WIDTH} "$SOURCE_FILE"
+    magick "$file" -resize ${PREVIEW_IMAGE_WIDTH} "$SOURCE_FILE"
     echo "Done"
   else
     echo "Preview already exists"
