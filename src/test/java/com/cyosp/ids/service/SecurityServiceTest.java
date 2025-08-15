@@ -158,7 +158,7 @@ class SecurityServiceTest {
         String tmpdir = getProperty("java.io.tmpdir");
         doReturn(tmpdir)
                 .when(idsConfiguration)
-                .getAbsoluteImagesDirectory();
+                .getAbsoluteMediasDirectory();
 
         String rootDirectory = "ids-backend.root";
         temporaryBaseDirectory = new File(tmpdir + separator + rootDirectory);

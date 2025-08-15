@@ -32,14 +32,14 @@ Update `ids.toml` project file if needed and run:
 
 Replace:
  * `/path/to/ids/data/directory` with your own IDS data folder
- * `/path/to/images/directory` with your own images directory
- * `shared-images` with the directory configured inside `ids.toml`
+ * `/path/to/medias/directory` with your own images and videos directory
+ * `shared-medias` with the directory configured inside `ids.toml`
  * `0.0.0` with the expected IDS version
 
 And run:
 ```
 docker run -v /path/to/ids/data/directory:/data \
-    -v /path/to/images/directory:/shared-images \
+    -v /path/to/medias/directory:/shared-medias \
     -p 8080:8080 cyosp/ids-backend:0.0.0
 ```
 

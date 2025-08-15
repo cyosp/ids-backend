@@ -3,8 +3,10 @@ package com.cyosp.ids.graphql;
 import com.cyosp.ids.model.Directory;
 import com.cyosp.ids.model.FileSystemElement;
 import com.cyosp.ids.model.Image;
-import com.cyosp.ids.model.ImageMetadata;
+import com.cyosp.ids.model.Metadata;
+import com.cyosp.ids.model.Video;
 import com.cyosp.ids.service.FileSystemElementService;
+import com.cyosp.ids.service.MetadataService;
 import com.cyosp.ids.service.SecurityService;
 import graphql.GraphQLContext;
 import graphql.schema.DataFetcher;
@@ -23,12 +25,21 @@ import static java.lang.Boolean.TRUE;
 public class TypeDataFetcher {
     private final SecurityService securityService;
     private final FileSystemElementService fileSystemElementService;
+    private final MetadataService metadataService;
 
-    public DataFetcher<ImageMetadata> getImageMetadata() {
+    public DataFetcher<Metadata> getImageMetadata() {
         return dataFetchingEnvironment -> {
             Image image = dataFetchingEnvironment.getSource();
             securityService.checkAccessAllowed(image);
-            return ImageMetadata.from(image);
+            return metadataService.from(image);
+        };
+    }
+
+    public DataFetcher<Metadata> getVideoMetadata() {
+        return dataFetchingEnvironment -> {
+            Video video = dataFetchingEnvironment.getSource();
+            securityService.checkAccessAllowed(video);
+            return metadataService.from(video);
         };
     }
 

@@ -41,7 +41,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-        List<String> publicPaths = idsConfiguration.areImagesPublicShared() ? of("/**")
+        List<String> publicPaths = idsConfiguration.areMediasPublicShared() ? of("/**")
                 : asList(SIGNUP_PATH + "/**", SIGNIN_PATH);
 
         httpSecurity

@@ -3,7 +3,9 @@ package com.cyosp.ids.graphql;
 import com.cyosp.ids.model.Directory;
 import com.cyosp.ids.model.FileSystemElement;
 import com.cyosp.ids.model.Image;
-import com.cyosp.ids.model.ImageMetadata;
+import com.cyosp.ids.model.Media;
+import com.cyosp.ids.model.Metadata;
+import com.cyosp.ids.model.Video;
 import com.google.common.io.Resources;
 import graphql.GraphQL;
 import graphql.schema.GraphQLSchema;
@@ -29,7 +31,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @Component
 @RequiredArgsConstructor
 public class GraphQLProvider {
-    public  static final String IMAGE = "image";
+    public static final String MEDIA = "media";
 
     static final String DIRECTORY_REVERSED_ORDER = "directoryReversedOrder";
     static final String PREVIEW_DIRECTORY_REVERSED_ORDER = "previewDirectoryReversedOrder";
@@ -59,8 +61,10 @@ public class GraphQLProvider {
         Object object = typeResolutionEnvironment.getObject();
         if (object instanceof Image) {
             return typeResolutionEnvironment.getSchema().getObjectType(Image.class.getSimpleName());
-        } else if (object instanceof ImageMetadata) {
-            return typeResolutionEnvironment.getSchema().getObjectType(ImageMetadata.class.getSimpleName());
+        } else if (object instanceof Video) {
+            return typeResolutionEnvironment.getSchema().getObjectType(Video.class.getSimpleName());
+        } else if (object instanceof Metadata) {
+            return typeResolutionEnvironment.getSchema().getObjectType(Metadata.class.getSimpleName());
         } else if (object instanceof Directory) {
             return typeResolutionEnvironment.getSchema().getObjectType(Directory.class.getSimpleName());
         } else {
@@ -79,16 +83,20 @@ public class GraphQLProvider {
         return newRuntimeWiring()
                 .type(FileSystemElement.class.getSimpleName(),
                         typeWriting -> typeWriting.typeResolver(fileSystemElementTypeResolver))
+                .type(Media.class.getSimpleName(),
+                        typeWriting -> typeWriting.typeResolver(fileSystemElementTypeResolver))
                 .type(newTypeWiring(Image.class.getSimpleName())
                         .dataFetcher("metadata", typeDataFetcher.getImageMetadata()))
+                .type(newTypeWiring(Video.class.getSimpleName())
+                        .dataFetcher("metadata", typeDataFetcher.getVideoMetadata()))
                 .type(newTypeWiring(Directory.class.getSimpleName())
                         .dataFetcher("elements", typeDataFetcher.getDirectoryElementsDataFetcher()))
                 .type(newTypeWiring(QUERY)
                         .dataFetcher("list", queryDataFetcher.getFileSystemElementsDataFetcher()))
                 .type(newTypeWiring(QUERY)
-                        .dataFetcher("getImages", queryDataFetcher.getImages()))
+                        .dataFetcher("getMedias", queryDataFetcher.getMedias()))
                 .type(newTypeWiring(QUERY)
-                        .dataFetcher("getImage", queryDataFetcher.getImage()))
+                        .dataFetcher("getMedia", queryDataFetcher.getMedia()))
                 .type(newTypeWiring(QUERY)
                         .dataFetcher("users", queryDataFetcher.getUsersDataFetcher()))
                 .type(newTypeWiring(MUTATION)
@@ -96,7 +104,7 @@ public class GraphQLProvider {
                 .type(newTypeWiring(MUTATION)
                         .dataFetcher("changePassword", mutationDataFetcher.changePassword()))
                 .type(newTypeWiring(MUTATION)
-                        .dataFetcher("deleteImage", mutationDataFetcher.deleteImage()))
+                        .dataFetcher("deleteMedia", mutationDataFetcher.deleteMedia()))
                 .build();
     }
 

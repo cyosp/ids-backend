@@ -26,9 +26,9 @@ public class IdsConfiguration {
     @VisibleForTesting
     static final String GENERAL_PASSWORD_CHANGE_ALLOWED = "general.password-change-allowed";
     @VisibleForTesting
-    static final String IMAGES_PUBLIC_SHARE_PROPERTY = "images.public-share";
+    static final String MEDIAS_PUBLIC_SHARE_PROPERTY = "medias.public-share";
     @VisibleForTesting
-    static final String IMAGES_STATIC_PREVIEW_DIRECTORY_PROPERTY = "images.static-preview-directory";
+    static final String MEDIAS_STATIC_PREVIEW_DIRECTORY_PROPERTY = "medias.static-preview-directory";
     @VisibleForTesting
     static final String SIGNUP_USER_PROPERTY = "signup.user";
     @VisibleForTesting
@@ -71,8 +71,8 @@ public class IdsConfiguration {
         }
     }
 
-    public String getAbsoluteImagesDirectory() {
-        String imagesDirectory = tomlParseResult.getString("images.directory");
+    public String getAbsoluteMediasDirectory() {
+        String imagesDirectory = tomlParseResult.getString("medias.directory");
         if (!imagesDirectory.startsWith(separator)) {
             String userDir = getProperty("user.dir");
             if (!userDir.endsWith(separator)) userDir += separator;
@@ -86,11 +86,11 @@ public class IdsConfiguration {
         return isNull(userCanSignup) ? TRUE : TRUE.equals(userCanSignup);
     }
 
-    public boolean areImagesPublicShared() {
-        return TRUE.equals(tomlParseResult.getBoolean(IMAGES_PUBLIC_SHARE_PROPERTY));
+    public boolean areMediasPublicShared() {
+        return TRUE.equals(tomlParseResult.getBoolean(MEDIAS_PUBLIC_SHARE_PROPERTY));
     }
 
     public boolean isStaticPreviewDirectory() {
-        return TRUE.equals(tomlParseResult.getBoolean(IMAGES_STATIC_PREVIEW_DIRECTORY_PROPERTY));
+        return TRUE.equals(tomlParseResult.getBoolean(MEDIAS_STATIC_PREVIEW_DIRECTORY_PROPERTY));
     }
 }

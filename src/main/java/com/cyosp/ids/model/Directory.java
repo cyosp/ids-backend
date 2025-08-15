@@ -14,8 +14,9 @@ import static lombok.AccessLevel.PRIVATE;
 @NoArgsConstructor(access = PRIVATE)
 @EqualsAndHashCode(callSuper = true)
 public class Directory extends FileSystemElement {
+    public static final String IDS_HIDDEN_DIRECTORY = ".ids";
 
-    private Image preview = null;
+    private Media preview = null;
 
     public Directory(String absoluteImagesDirectory, File relativeFile) {
         super(absoluteImagesDirectory, relativeFile);

@@ -10,11 +10,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.tomlj.TomlArray;
 import org.tomlj.TomlParseResult;
 
-import java.util.List;
-
 import static com.cyosp.ids.configuration.IdsConfiguration.GENERAL_PASSWORD_CHANGE_ALLOWED;
-import static com.cyosp.ids.configuration.IdsConfiguration.IMAGES_PUBLIC_SHARE_PROPERTY;
-import static com.cyosp.ids.configuration.IdsConfiguration.IMAGES_STATIC_PREVIEW_DIRECTORY_PROPERTY;
+import static com.cyosp.ids.configuration.IdsConfiguration.MEDIAS_PUBLIC_SHARE_PROPERTY;
+import static com.cyosp.ids.configuration.IdsConfiguration.MEDIAS_STATIC_PREVIEW_DIRECTORY_PROPERTY;
 import static com.cyosp.ids.configuration.IdsConfiguration.SIGNUP_USER_PROPERTY;
 import static com.cyosp.ids.configuration.IdsConfiguration.USERS_PASSWORD_CHANGE_DENIED;
 import static java.util.List.of;
@@ -158,37 +156,37 @@ class IdsConfigurationTest {
     }
 
     @Test
-    void areImagesPublicShared_propertyNotDefined() {
+    void areMediasPublicShared_propertyNotDefined() {
         doReturn(null)
                 .when(tomlParseResult)
-                .getBoolean(IMAGES_PUBLIC_SHARE_PROPERTY);
+                .getBoolean(MEDIAS_PUBLIC_SHARE_PROPERTY);
 
-        assertFalse(idsConfiguration.areImagesPublicShared());
+        assertFalse(idsConfiguration.areMediasPublicShared());
     }
 
     @Test
-    void areImagesPublicShared_propertySetToTrue() {
+    void areMediasPublicShared_propertySetToTrue() {
         doReturn(true)
                 .when(tomlParseResult)
-                .getBoolean(IMAGES_PUBLIC_SHARE_PROPERTY);
+                .getBoolean(MEDIAS_PUBLIC_SHARE_PROPERTY);
 
-        assertTrue(idsConfiguration.areImagesPublicShared());
+        assertTrue(idsConfiguration.areMediasPublicShared());
     }
 
     @Test
-    void areImagesPublicShared_propertySetToFalse() {
+    void areMediasPublicShared_propertySetToFalse() {
         doReturn(false)
                 .when(tomlParseResult)
-                .getBoolean(IMAGES_PUBLIC_SHARE_PROPERTY);
+                .getBoolean(MEDIAS_PUBLIC_SHARE_PROPERTY);
 
-        assertFalse(idsConfiguration.areImagesPublicShared());
+        assertFalse(idsConfiguration.areMediasPublicShared());
     }
 
     @Test
     void isStaticPreviewDirectory_propertyNotDefined() {
         doReturn(null)
                 .when(tomlParseResult)
-                .getBoolean(IMAGES_STATIC_PREVIEW_DIRECTORY_PROPERTY);
+                .getBoolean(MEDIAS_STATIC_PREVIEW_DIRECTORY_PROPERTY);
 
         assertFalse(idsConfiguration.isStaticPreviewDirectory());
     }
@@ -197,7 +195,7 @@ class IdsConfigurationTest {
     void isStaticPreviewDirectory_propertySetToTrue() {
         doReturn(true)
                 .when(tomlParseResult)
-                .getBoolean(IMAGES_STATIC_PREVIEW_DIRECTORY_PROPERTY);
+                .getBoolean(MEDIAS_STATIC_PREVIEW_DIRECTORY_PROPERTY);
 
         assertTrue(idsConfiguration.isStaticPreviewDirectory());
     }
@@ -206,7 +204,7 @@ class IdsConfigurationTest {
     void isStaticPreviewDirectory_propertySetToFalse() {
         doReturn(false)
                 .when(tomlParseResult)
-                .getBoolean(IMAGES_STATIC_PREVIEW_DIRECTORY_PROPERTY);
+                .getBoolean(MEDIAS_STATIC_PREVIEW_DIRECTORY_PROPERTY);
 
         assertFalse(idsConfiguration.isStaticPreviewDirectory());
     }

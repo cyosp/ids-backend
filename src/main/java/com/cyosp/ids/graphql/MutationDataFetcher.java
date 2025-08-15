@@ -3,10 +3,12 @@ package com.cyosp.ids.graphql;
 import com.cyosp.ids.configuration.IdsConfiguration;
 import com.cyosp.ids.graphql.exception.BadCredentialsException;
 import com.cyosp.ids.graphql.exception.ForbiddenException;
-import com.cyosp.ids.graphql.exception.ImageDoesntExistException;
+import com.cyosp.ids.graphql.exception.MediaDoesntExistException;
 import com.cyosp.ids.graphql.exception.SameFieldsException;
 import com.cyosp.ids.model.Image;
+import com.cyosp.ids.model.Media;
 import com.cyosp.ids.model.User;
+import com.cyosp.ids.model.Video;
 import com.cyosp.ids.repository.UserRepository;
 import com.cyosp.ids.service.FileSystemElementService;
 import com.cyosp.ids.service.ModelService;
@@ -15,9 +17,17 @@ import com.cyosp.ids.service.SecurityService;
 import graphql.schema.DataFetcher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.Java2DFrameConverter;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.stereotype.Component;
+import ws.schild.jave.Encoder;
+import ws.schild.jave.MultimediaObject;
+import ws.schild.jave.encode.AudioAttributes;
+import ws.schild.jave.encode.EncodingAttributes;
+import ws.schild.jave.encode.VideoAttributes;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageWriteParam;
@@ -67,7 +77,7 @@ public class MutationDataFetcher {
 
     private final SecurityService securityService;
 
-    private BufferedImage createPreview(BufferedImage bufferedImage) {
+    private BufferedImage createPreviewImage(BufferedImage bufferedImage) {
         int previewImageWidth;
         int previewImageHeight;
         final int previewMaximumSize = 1080;
@@ -82,7 +92,7 @@ public class MutationDataFetcher {
         return resize(bufferedImage, previewImageWidth, previewImageHeight);
     }
 
-    private BufferedImage createThumbnail(BufferedImage bufferedImage) {
+    private BufferedImage createThumbnailImage(BufferedImage bufferedImage) {
         int imageWidth = bufferedImage.getWidth();
         int imageHeight = bufferedImage.getHeight();
 
@@ -133,36 +143,92 @@ public class MutationDataFetcher {
         imageWriter.dispose();
     }
 
-    public DataFetcher<List<Image>> generateAlternativeFormats() {
+    private void createPreviewVideo(Video source, File output) {
+        try {
+            AudioAttributes audioAttributes = new AudioAttributes();
+            audioAttributes.setCodec("libmp3lame");
+            audioAttributes.setBitRate(180_000);
+            VideoAttributes videoAttributes = new VideoAttributes();
+            videoAttributes.setCodec("libx264"); // 2025-08-19: mpeg4 coded is not supported by Firefox
+            videoAttributes.setBitRate(1_200_000);
+            EncodingAttributes encodingAttributes = new EncodingAttributes();
+            encodingAttributes.setOutputFormat("mp4");
+            encodingAttributes.setAudioAttributes(audioAttributes);
+            encodingAttributes.setVideoAttributes(videoAttributes);
+            new Encoder().encode(new MultimediaObject(source.getFile()), output, encodingAttributes);
+        } catch (Exception e) {
+            log.error("Fail to create preview video: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    private BufferedImage extractImage(Video video) {
+        try (FFmpegFrameGrabber ffmpegFrameGrabber = new FFmpegFrameGrabber(video.getFile());
+             Java2DFrameConverter java2DFrameConverter = new Java2DFrameConverter()) {
+            ffmpegFrameGrabber.start();
+
+            int totalFrames = ffmpegFrameGrabber.getLengthInFrames();
+            double frameRate = ffmpegFrameGrabber.getFrameRate();
+            double videoDurationInSecond = totalFrames / frameRate;
+
+            int expectedTimeToExtractImageInSecond = 3;
+            int timeToExtractImageInSecond = videoDurationInSecond > expectedTimeToExtractImageInSecond ? expectedTimeToExtractImageInSecond : (int) (videoDurationInSecond / 2);
+            int frameToExtract = timeToExtractImageInSecond * (int) frameRate;
+
+            for (int i = 1; i < frameToExtract; i++) {
+                ffmpegFrameGrabber.grabImage();
+            }
+            Frame frame = ffmpegFrameGrabber.grabImage();
+            ffmpegFrameGrabber.stop();
+            return java2DFrameConverter.convert(frame);
+        } catch (Exception e) {
+            log.error("Fail to extract image: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public DataFetcher<List<Media>> generateAlternativeFormats() {
         return dataFetchingEnvironment -> {
             securityService.checkAdministratorUser();
             // Generate alternative formats first for recent dated folders
             final boolean directoryReversedOrder = true;
             final boolean previewDirectoryReversedOrder = false;
             boolean forceThumbnailGeneration = TRUE.equals(dataFetchingEnvironment.getArgument(FORCE_THUMBNAIL_GENERATION));
-            final List<Image> images = new ArrayList<>();
+            final List<Media> medias = new ArrayList<>();
             String directory = dataFetchingEnvironment.getArgument(DIRECTORY);
-            for (Image image : fileSystemElementService.listImagesInAllDirectories(directory, directoryReversedOrder, previewDirectoryReversedOrder)) {
-                File previewFile = image.getPreviewFile();
-                File thumbnailFile = image.getThumbnailFile();
+            for (Media media : fileSystemElementService.listMediasInAllDirectories(directory, directoryReversedOrder, previewDirectoryReversedOrder)) {
+                File previewFile = media.getPreviewFile();
+                File thumbnailFile = media.getThumbnailFile();
 
                 if (!previewFile.exists() || !thumbnailFile.exists() || forceThumbnailGeneration) {
-                    BufferedImage bufferedImage = read(image.getFile());
+                    if (media instanceof Image) {
+                        BufferedImage bufferedImage = read(media.getFile());
 
-                    if (!previewFile.exists()) {
-                        log.info("Create: {}", previewFile.getAbsolutePath());
-                        save(createPreview(bufferedImage), previewFile);
+                        if (!previewFile.exists()) {
+                            log.info("Create: {}", previewFile.getAbsolutePath());
+                            save(createPreviewImage(bufferedImage), previewFile);
+                        }
+
+                        if (!thumbnailFile.exists() || forceThumbnailGeneration) {
+                            log.info("Create: {}", thumbnailFile.getAbsolutePath());
+                            save(createThumbnailImage(bufferedImage), thumbnailFile);
+                        }
+                    } else if (media instanceof Video) {
+                        Video video = (Video) media;
+                        if (!previewFile.exists()) {
+                            log.info("Create: {}", previewFile.getAbsolutePath());
+                            createPreviewVideo(video, previewFile);
+                        }
+
+                        if (!thumbnailFile.exists() || forceThumbnailGeneration) {
+                            log.info("Create: {}", thumbnailFile.getAbsolutePath());
+                            save(createThumbnailImage(extractImage(video)), thumbnailFile);
+                        }
                     }
-
-                    if (!thumbnailFile.exists() || forceThumbnailGeneration) {
-                        log.info("Create: {}", thumbnailFile.getAbsolutePath());
-                        save(createThumbnail(bufferedImage), thumbnailFile);
-                    }
-
-                    images.add(image);
+                    medias.add(media);
                 }
             }
-            return images;
+            return medias;
         };
     }
 
@@ -187,29 +253,29 @@ public class MutationDataFetcher {
         };
     }
 
-    public DataFetcher<Image> deleteImage() {
+    public DataFetcher<Media> deleteMedia() {
         return dataFetchingEnvironment -> {
             securityService.checkAdministratorUser();
 
-            Image image = modelService.getImage(dataFetchingEnvironment);
-            deleteImage(image.getThumbnailFile(), false);
-            deleteImage(image.getPreviewFile(), false);
-            deleteImage(image.getFile(), true);
+            Media media = modelService.getMedia(dataFetchingEnvironment);
+            deleteMedia(media.getThumbnailFile(), false);
+            deleteMedia(media.getPreviewFile(), false);
+            deleteMedia(media.getFile(), true);
 
-            return image;
+            return media;
         };
     }
 
-    private void deleteImage(File image, boolean imageMustExist) throws IOException {
-        String imageAbsolutePath = image.getAbsolutePath();
-        log.info("Image to delete: {}", imageAbsolutePath);
+    private void deleteMedia(File media, boolean mediaMustExist) throws IOException {
+        String mediaAbsolutePath = media.getAbsolutePath();
+        log.info("Media to delete: {}", mediaAbsolutePath);
 
-        if (image.exists()) {
-            delete(image.toPath());
-        } else if (imageMustExist) {
-            String imageId = image.getAbsoluteFile().getAbsolutePath()
-                    .replace(idsConfiguration.getAbsoluteImagesDirectory() + separator, "");
-            throw new ImageDoesntExistException(imageId);
+        if (media.exists()) {
+            delete(media.toPath());
+        } else if (mediaMustExist) {
+            String mediaId = media.getAbsoluteFile().getAbsolutePath()
+                    .replace(idsConfiguration.getAbsoluteMediasDirectory() + separator, "");
+            throw new MediaDoesntExistException(mediaId);
         } else {
             log.info("Image doesn't exist");
         }

@@ -14,7 +14,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.cyosp.ids.model.Image.IDS_HIDDEN_DIRECTORY;
+import static com.cyosp.ids.model.Directory.IDS_HIDDEN_DIRECTORY;
 import static com.cyosp.ids.model.Role.ADMINISTRATOR;
 import static java.io.File.separator;
 import static java.lang.String.format;
@@ -69,7 +69,7 @@ public class SecurityService {
             String login = getContext().getAuthentication().getName();
             log.info(format("[%s] Check access: %s", login, fileSystemElementId));
             for (String directoryPath : getDirectoryPaths(fileSystemElementId)) {
-                File accessDeniedFile = new File(idsConfiguration.getAbsoluteImagesDirectory()
+                File accessDeniedFile = new File(idsConfiguration.getAbsoluteMediasDirectory()
                         + separator + directoryPath
                         + separator + IDS_HIDDEN_DIRECTORY
                         + separator + "access.denied." + login);
