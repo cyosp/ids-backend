@@ -1,7 +1,7 @@
 [general]
 password-change-allowed=true
 
-[images]
+[medias]
 directory="."
 public-share=false
 static-preview-directory=false

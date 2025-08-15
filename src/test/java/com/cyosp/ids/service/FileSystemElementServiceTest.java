@@ -59,14 +59,14 @@ class FileSystemElementServiceTest {
 
         doReturn(false)
                 .when(modelService)
-                .isImage(directoryPath);
+                .isMedia(directoryPath);
         doReturn(true)
                 .when(modelService)
-                .isImage(imagePath);
+                .isMedia(imagePath);
         Image image = Image.from(null, imagePath.toFile());
         doReturn(image)
                 .when(modelService)
-                .imageFrom(imagePath);
+                .mediaFrom(imagePath);
 
         List<FileSystemElement> fileSystemElements = fileSystemElementService.list(directoryString, false, false, false);
 

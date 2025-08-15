@@ -1,7 +1,7 @@
 package com.cyosp.ids.graphql;
 
 import com.cyosp.ids.model.FileSystemElement;
-import com.cyosp.ids.model.Image;
+import com.cyosp.ids.model.Media;
 import com.cyosp.ids.model.User;
 import com.cyosp.ids.repository.UserRepository;
 import com.cyosp.ids.service.FileSystemElementService;
@@ -20,7 +20,7 @@ import java.util.List;
 
 import static com.cyosp.ids.graphql.GraphQLProvider.DIRECTORY;
 import static com.cyosp.ids.graphql.GraphQLProvider.DIRECTORY_REVERSED_ORDER;
-import static com.cyosp.ids.graphql.GraphQLProvider.IMAGE;
+import static com.cyosp.ids.graphql.GraphQLProvider.MEDIA;
 import static com.cyosp.ids.graphql.GraphQLProvider.PREVIEW_DIRECTORY_REVERSED_ORDER;
 import static java.lang.Boolean.TRUE;
 import static java.nio.file.Paths.get;
@@ -53,33 +53,33 @@ public class QueryDataFetcher {
         };
     }
 
-    public DataFetcher<Image> getImage() {
+    public DataFetcher<Media> getMedia() {
         return dataFetchingEnvironment -> {
-            Image image = modelService.getImage(dataFetchingEnvironment);
-            securityService.checkAccessAllowed(image);
-            return image;
+            Media media = modelService.getMedia(dataFetchingEnvironment);
+            securityService.checkAccessAllowed(media);
+            return media;
         };
     }
 
-    public DataFetcher<List<Image>> getImages() {
+    public DataFetcher<List<Media>> getMedias() {
         return dataFetchingEnvironment -> {
             String directory = dataFetchingEnvironment.getArgument(DIRECTORY);
             securityService.checkAccessAllowed(directory);
 
             Iterator<Path> pathIterator = Files.list(get(fileSystemElementService.getAbsoluteDirectoryPath(directory)))
-                    .filter(modelService::isImage)
+                    .filter(modelService::isMedia)
                     .sorted(comparing(path -> path.getFileName().toString()))
                     .iterator();
 
-            String image = dataFetchingEnvironment.getArgument(IMAGE);
+            String media = dataFetchingEnvironment.getArgument(MEDIA);
             Path currentPath = null;
             while (pathIterator.hasNext()) {
                 Path previousPath = currentPath;
                 currentPath = pathIterator.next();
-                if (currentPath.getFileName().toString().equals(image)) {
-                    return asList(nonNull(previousPath) ? modelService.imageFrom(previousPath) : null,
-                            modelService.imageFrom(currentPath),
-                            pathIterator.hasNext() ? modelService.imageFrom(pathIterator.next()) : null);
+                if (currentPath.getFileName().toString().equals(media)) {
+                    return asList(nonNull(previousPath) ? modelService.mediaFrom(previousPath) : null,
+                            modelService.mediaFrom(currentPath),
+                            pathIterator.hasNext() ? modelService.mediaFrom(pathIterator.next()) : null);
                 }
             }
 

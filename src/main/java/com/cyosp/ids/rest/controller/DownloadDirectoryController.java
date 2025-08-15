@@ -53,13 +53,13 @@ public class DownloadDirectoryController {
         String directoryPath = fullPath.substring(0, fullPath.lastIndexOf(downloadExtension));
         securityService.checkAccessAllowed(directoryPath);
 
-        Path absoluteDirectoryPath = get(idsConfiguration.getAbsoluteImagesDirectory(), separator, directoryPath);
+        Path absoluteDirectoryPath = get(idsConfiguration.getAbsoluteMediasDirectory(), separator, directoryPath);
         if (!exists(absoluteDirectoryPath) || !isDirectory(absoluteDirectoryPath)) {
             throw new IllegalStateException("Path doesn't match an existing directory: " + fullPath);
         }
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream());
-             DirectoryStream<Path> paths = newDirectoryStream(absoluteDirectoryPath, modelService::isImage)) {
+             DirectoryStream<Path> paths = newDirectoryStream(absoluteDirectoryPath, modelService::isMedia)) {
             response.setStatus(SC_OK);
             for (Path path : paths) {
                 File file = path.toFile();

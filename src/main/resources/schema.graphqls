@@ -1,7 +1,7 @@
 type Query {
     list(directory: ID, directoryReversedOrder: Boolean, previewDirectoryReversedOrder: Boolean): [FileSystemElement]
-    getImages(directory: ID, image: String!): [Image]
-    getImage(image: ID!): Image
+    getMedias(directory: ID, media: String!): [Media]
+    getMedia(media: ID!): Media
     users: [User]
 }
 
@@ -15,21 +15,41 @@ type Directory implements FileSystemElement {
     __typename: String
     id: ID!
     name: String
-    preview: Image
+    preview: Media
     elements: [FileSystemElement]
 }
 
-type Image implements FileSystemElement {
+interface Media implements FileSystemElement {
+     __typename: String
+    id: ID!
+    name: String
+    urlPath: String
+    previewUrlPath: String
+    thumbnailUrlPath: String
+    metadata: Metadata
+}
+
+type Image implements Media, FileSystemElement {
     __typename: String
     id: ID!
     name: String
     urlPath: String
     previewUrlPath: String
     thumbnailUrlPath: String
-    metadata: ImageMetadata
+    metadata: Metadata
 }
 
-type ImageMetadata {
+type Video implements Media, FileSystemElement {
+    __typename: String
+    id: ID!
+    name: String
+    urlPath: String
+    previewUrlPath: String
+    thumbnailUrlPath: String
+    metadata: Metadata
+}
+
+type Metadata {
     takenAt: String
 }
 
@@ -45,7 +65,7 @@ type User {
 }
 
 type Mutation {
-    generateAlternativeFormats(directory: ID, forceThumbnailGeneration: Boolean): [Image]
+    generateAlternativeFormats(directory: ID, forceThumbnailGeneration: Boolean): [Media]
     changePassword(password: String!, newPassword: String!): User
-    deleteImage(image: ID!): Image
+    deleteMedia(media: ID!): Media
 }

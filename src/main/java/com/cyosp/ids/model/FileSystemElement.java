@@ -12,9 +12,7 @@ import static lombok.AccessLevel.PROTECTED;
 @NoArgsConstructor(access = PROTECTED)
 public abstract class FileSystemElement {
     protected String id;
-
     protected File file;
-
     protected String name;
 
     protected FileSystemElement(String absoluteImagesDirectory, File relativeFile) {

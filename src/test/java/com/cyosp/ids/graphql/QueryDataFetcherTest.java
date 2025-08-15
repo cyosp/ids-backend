@@ -2,6 +2,7 @@ package com.cyosp.ids.graphql;
 
 import com.cyosp.ids.model.FileSystemElement;
 import com.cyosp.ids.model.Image;
+import com.cyosp.ids.model.Media;
 import com.cyosp.ids.repository.UserRepository;
 import com.cyosp.ids.service.FileSystemElementService;
 import com.cyosp.ids.service.ModelService;
@@ -58,23 +59,23 @@ class QueryDataFetcherTest {
     }
 
     @Test
-    void getImage_accessDenied() {
-        Image image = Image.from(null, new File("a/b/c/d.jpg"));
-        doReturn(image)
+    void getMedia_accessDenied() {
+        Media media = Image.from(null, new File("a/b/c/d.jpg"));
+        doReturn(media)
                 .when(modelService)
-                .getImage(dataFetchingEnvironment);
+                .getMedia(dataFetchingEnvironment);
 
         doThrow(accessDeniedExceptionClass)
                 .when(securityService)
-                .checkAccessAllowed(image);
+                .checkAccessAllowed(media);
 
-        DataFetcher<Image> imageDataFetcher = queryDataFetcher.getImage();
+        DataFetcher<Media> mediaDataFetcher = queryDataFetcher.getMedia();
 
-        assertThrows(accessDeniedExceptionClass, () -> imageDataFetcher.get(dataFetchingEnvironment));
+        assertThrows(accessDeniedExceptionClass, () -> mediaDataFetcher.get(dataFetchingEnvironment));
     }
 
     @Test
-    void getImages_accessDenied() {
+    void getMedias_accessDenied() {
         String directory = "aa/bb/cc";
         doReturn(directory)
                 .when(dataFetchingEnvironment)
@@ -84,7 +85,7 @@ class QueryDataFetcherTest {
                 .when(securityService)
                 .checkAccessAllowed(directory);
 
-        DataFetcher<List<Image>> imagesDataFetcher = queryDataFetcher.getImages();
+        DataFetcher<List<Media>> imagesDataFetcher = queryDataFetcher.getMedias();
 
         assertThrows(accessDeniedExceptionClass, () -> imagesDataFetcher.get(dataFetchingEnvironment));
     }

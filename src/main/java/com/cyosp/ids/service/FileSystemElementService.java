@@ -3,7 +3,7 @@ package com.cyosp.ids.service;
 import com.cyosp.ids.configuration.IdsConfiguration;
 import com.cyosp.ids.model.Directory;
 import com.cyosp.ids.model.FileSystemElement;
-import com.cyosp.ids.model.Image;
+import com.cyosp.ids.model.Media;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,8 +41,8 @@ public class FileSystemElementService {
     private final ModelService modelService;
     private final SecurityService securityService;
 
-    private final Map<String, Image> previewDirectoryNaturalOrderMap = new HashMap<>();
-    private final Map<String, Image> previewDirectoryReversedOrderMap = new HashMap<>();
+    private final Map<String, Media> previewDirectoryNaturalOrderMap = new HashMap<>();
+    private final Map<String, Media> previewDirectoryReversedOrderMap = new HashMap<>();
     private boolean previewDirectoryLoaded = false;
 
     @EventListener(ApplicationReadyEvent.class)
@@ -58,26 +58,26 @@ public class FileSystemElementService {
     }
 
     public String getAbsoluteDirectoryPath(String relativeDirectory) {
-        final StringBuilder absoluteDirectoryPath = new StringBuilder(idsConfiguration.getAbsoluteImagesDirectory());
+        final StringBuilder absoluteDirectoryPath = new StringBuilder(idsConfiguration.getAbsoluteMediasDirectory());
         if (ofNullable(relativeDirectory).isPresent())
             absoluteDirectoryPath.append(separator).append(relativeDirectory);
         return absoluteDirectoryPath.toString();
     }
 
-    public List<Image> listImagesInAllDirectories(String directory, boolean directoryReversedOrder, boolean previewDirectoryReversedOrder) {
-        List<Image> images = new ArrayList<>();
+    public List<Media> listMediasInAllDirectories(String directory, boolean directoryReversedOrder, boolean previewDirectoryReversedOrder) {
+        List<Media> medias = new ArrayList<>();
         for (FileSystemElement fileSystemElement : listFileSystemElements(directory, directoryReversedOrder, previewDirectoryReversedOrder)) {
-            if (fileSystemElement instanceof Image)
-                images.add((Image) fileSystemElement);
+            if (fileSystemElement instanceof Media)
+                medias.add((Media) fileSystemElement);
             else {
-                images.addAll(
+                medias.addAll(
                         listRecursively(fileSystemElement.getId(), directoryReversedOrder, previewDirectoryReversedOrder).stream()
-                                .filter(Image.class::isInstance)
-                                .map(Image.class::cast)
+                                .filter(Media.class::isInstance)
+                                .map(Media.class::cast)
                                 .collect(toList()));
             }
         }
-        return images;
+        return medias;
     }
 
     private List<FileSystemElement> listRecursively(String directory, boolean directoryReversedOrder, boolean previewDirectoryReversedOrder) {
@@ -92,18 +92,18 @@ public class FileSystemElementService {
         return list(modelService.stringRelative(directory), false, directoryReversedOrder, previewDirectoryReversedOrder);
     }
 
-    private Image preview(Directory directory, boolean previewDirectoryReversedOrder) {
+    private Media preview(Directory directory, boolean previewDirectoryReversedOrder) {
         List<FileSystemElement> fileSystemElements = listFileSystemElements(directory, previewDirectoryReversedOrder, previewDirectoryReversedOrder);
 
-        Image image = fileSystemElements.stream()
+        Media media = fileSystemElements.stream()
                 .map(fse -> Path.of(fse.getFile().toURI()))
-                .filter(modelService::isImage)
+                .filter(modelService::isMedia)
                 .sorted(previewDirectoryReversedOrder ? reverseOrder() : naturalOrder())
-                .map(modelService::imageFrom)
+                .map(modelService::mediaFrom)
                 .findFirst()
                 .orElse(null);
 
-        return ofNullable(image)
+        return ofNullable(media)
                 .orElse(fileSystemElements.stream()
                         .map(fse -> Path.of(fse.getFile().toURI()))
                         .filter(modelService::isDirectory)
@@ -118,7 +118,7 @@ public class FileSystemElementService {
     List<Path> getUnorderedPaths(String directoryString) {
         List<Path> unorderedPaths = new ArrayList<>();
         try (DirectoryStream<Path> paths = newDirectoryStream(get(getAbsoluteDirectoryPath(directoryString)),
-                path -> modelService.isImage(path) || modelService.isDirectory(path))) {
+                path -> modelService.isMedia(path) || modelService.isDirectory(path))) {
             paths.forEach(unorderedPaths::add);
         } catch (IOException e) {
             log.warn("Fail to list file system elements: " + e.getMessage());
@@ -142,7 +142,7 @@ public class FileSystemElementService {
                 .filter(securityService::isAccessAllowed)
                 .sorted(directoryReversedOrder ? byName().reversed() : byName())
                 .forEach(directory -> {
-                    Image preview = null;
+                    Media preview = null;
                     if (idsConfiguration.isStaticPreviewDirectory()) {
                         String directoryId = directory.getId();
                         if (previewDirectoryLoaded) {
@@ -164,8 +164,8 @@ public class FileSystemElementService {
                 });
 
         unorderedPaths.stream()
-                .filter(modelService::isImage)
-                .map(modelService::imageFrom)
+                .filter(modelService::isMedia)
+                .map(modelService::mediaFrom)
                 .filter(securityService::isAccessAllowed)
                 .sorted(byName())
                 .forEach(fileSystemElements::add);
