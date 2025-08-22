@@ -65,7 +65,13 @@ createPreviewImage() {
       local IMAGE_RATIO=$(awk "BEGIN { print "$IMAGE_WIDTH/$IMAGE_HEIGHT" }")
       local PREVIEW_IMAGE_WIDTH=$(echo "$PREVIEW_MAX_SIZE*$IMAGE_RATIO/1" | bc)
       echo "Start preview generation"
-      magick "$file" -resize ${PREVIEW_IMAGE_WIDTH} "$PREVIEW_FILE"
+      if [ $IMAGE_WIDTH -ge $IMAGE_HEIGHT ] && [ $IMAGE_WIDTH -gt $PREVIEW_MAX_SIZE ]; then
+          magick "$file" -resize "${PREVIEW_MAX_SIZE}" "$PREVIEW_FILE"
+      elif [ $IMAGE_HEIGHT -gt $IMAGE_WIDTH ] && [ $IMAGE_HEIGHT -gt $PREVIEW_MAX_SIZE ]; then
+           magick "$file" -resize "x${PREVIEW_MAX_SIZE}" "$PREVIEW_FILE"
+      else
+        cp "$file" "$PREVIEW_FILE"
+      fi
       echo "Done"
     else
       echo "Preview already exists"

@@ -39,6 +39,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.cyosp.ids.graphql.GraphQLProvider.DIRECTORY;
 import static com.cyosp.ids.graphql.GraphQLProvider.FORCE_THUMBNAIL_GENERATION;
@@ -49,9 +50,11 @@ import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static java.io.File.separator;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
+import static java.nio.file.Files.copy;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.delete;
 import static java.nio.file.Paths.get;
+import static java.util.Optional.empty;
 import static javax.imageio.ImageIO.createImageOutputStream;
 import static javax.imageio.ImageIO.getImageWritersByFormatName;
 import static javax.imageio.ImageIO.read;
@@ -77,19 +80,29 @@ public class MutationDataFetcher {
 
     private final SecurityService securityService;
 
-    private BufferedImage createPreviewImage(BufferedImage bufferedImage) {
+    private Optional<BufferedImage> createPreviewImage(BufferedImage bufferedImage) {
         int previewImageWidth;
         int previewImageHeight;
         final int previewMaximumSize = 1080;
-        final float previewImageRatio = (float) bufferedImage.getWidth() / bufferedImage.getHeight();
-        if (bufferedImage.getWidth() >= bufferedImage.getHeight()) {
+        int imageWidth = bufferedImage.getWidth();
+        int imageHeight = bufferedImage.getHeight();
+        final float previewImageRatio = (float) imageWidth / imageHeight;
+        if (imageWidth >= imageHeight && imageWidth > previewMaximumSize) {
             previewImageWidth = previewMaximumSize;
-            previewImageHeight = (int) (previewImageWidth * previewImageRatio);
-        } else {
+            previewImageHeight = (int) (previewImageWidth / previewImageRatio);
+        } else if (imageHeight > imageWidth && imageHeight > previewMaximumSize) {
             previewImageHeight = previewMaximumSize;
-            previewImageWidth = (int) (previewImageHeight * previewImageRatio);
+            previewImageWidth = (int) (previewImageHeight / previewImageRatio);
+        } else {
+            return empty();
         }
-        return resize(bufferedImage, previewImageWidth, previewImageHeight);
+        return Optional.of(resize(bufferedImage, previewImageWidth, previewImageHeight));
+    }
+
+    private void copyFileToPreview(Media media) throws IOException {
+        File previewFile = media.getPreviewFile();
+        createDirectories(get(previewFile.getParent()));
+        copy(media.getFile().toPath(), previewFile.toPath());
     }
 
     private BufferedImage createThumbnailImage(BufferedImage bufferedImage) {
@@ -206,7 +219,12 @@ public class MutationDataFetcher {
 
                         if (!previewFile.exists()) {
                             log.info("Create: {}", previewFile.getAbsolutePath());
-                            save(createPreviewImage(bufferedImage), previewFile);
+                            Optional<BufferedImage> optionalBufferedImage = createPreviewImage(bufferedImage);
+                            if (optionalBufferedImage.isPresent()) {
+                                save(optionalBufferedImage.get(), previewFile);
+                            } else {
+                                copyFileToPreview(media);
+                            }
                         }
 
                         if (!thumbnailFile.exists() || forceThumbnailGeneration) {
