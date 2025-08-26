@@ -1,0 +1,6 @@
+< {%
+    request.variables.set("access-token", client.global.get("access-token"))
+%}
+
+GET {{urlPrefix}}/images/image.jpg
+Authorization: Bearer {{access-token}}

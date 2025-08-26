@@ -4,5 +4,8 @@
 # Gradle
 .gradle
 
+# http-client
+/http-client/http-client.private.env.json
+
 /build/
 /out/

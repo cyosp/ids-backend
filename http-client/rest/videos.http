@@ -1,0 +1,6 @@
+< {%
+    request.variables.set("access-token", client.global.get("access-token"))
+%}
+
+GET {{urlPrefix}}/videos/video.mov
+Authorization: Bearer {{access-token}}

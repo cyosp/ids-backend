@@ -1,0 +1,11 @@
+POST {{urlPrefix}}/api/auth/signin
+Content-Type: application/json
+
+{
+  "email": "{{user.email}}",
+  "password": "{{user.password}}"
+}
+
+> {%
+    client.global.set("access-token", response.body["accessToken"]);
+%}

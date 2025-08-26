@@ -1,0 +1,5 @@
+< {%
+    request.variables.set("access-token", client.global.get("access-token"))
+%}
+GET {{urlPrefix}}/download/directoy.zip
+Authorization: Bearer {{access-token}}

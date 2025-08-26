@@ -1,0 +1,7 @@
+POST {{urlPrefix}}/api/auth/signup
+Content-Type: application/json
+
+{
+  "email": "{{admin.email}}",
+  "password": "{{admin.password}}"
+}
