@@ -1,0 +1,16 @@
+< {%
+   request.variables.set("access-token", client.global.get("access-token"))
+%}
+GRAPHQL {{urlPrefix}}/graphql
+Authorization: Bearer {{access-token}}
+
+{
+  getMedias(directory: "directory", media: "media") {
+    id
+    name
+    __typename
+      urlPath
+      previewUrlPath
+      thumbnailUrlPath
+  }
+}

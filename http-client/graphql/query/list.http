@@ -1,0 +1,54 @@
+< {%
+   request.variables.set("access-token", client.global.get("access-token"))
+%}
+GRAPHQL {{urlPrefix}}/graphql
+Authorization: Bearer {{access-token}}
+
+{
+   list(directory: "directory", directoryReversedOrder: true) {
+      id
+      name
+      __typename
+      ... on Directory {
+         preview {
+            urlPath
+            previewUrlPath
+            thumbnailUrlPath
+         }
+         elements {
+            id
+            name
+            __typename
+            ... on Directory {
+               preview {
+                  urlPath
+                  previewUrlPath
+                  thumbnailUrlPath
+               }
+               elements {
+                  id
+                  name
+                  __typename
+                  ... on Directory {
+                     elements {
+                        id
+                        name
+                        __typename
+                     }
+                  }
+                  ... on Media {
+                     urlPath
+                     previewUrlPath
+                     thumbnailUrlPath
+                  }
+               }
+            }
+         }
+      }
+      ... on Media {
+         urlPath
+         previewUrlPath
+         thumbnailUrlPath
+      }
+   }
+}

@@ -1,0 +1,14 @@
+< {%
+    request.variables.set("admin-access-token", client.global.get("admin-access-token"))
+%}
+GRAPHQL {{urlPrefix}}/graphql
+Authorization: Bearer {{admin-access-token}}
+
+{
+  users {
+    id
+    email
+    role
+  }
+}
+
