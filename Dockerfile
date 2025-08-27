@@ -2,7 +2,7 @@ FROM debian:trixie-slim AS java-runtime
 RUN apt update && apt upgrade -y
 RUN apt install -y openjdk-21-jdk-headless
 RUN jlink \
-     --module-path $(echo $(dirname $(readlink $(readlink $(whereis jlink))))/../jmods) \
+     --module-path $(echo $(dirname $(readlink $(readlink $(which jlink))))/../jmods) \
      --compress=2 \
      --add-modules java.base,java.compiler,java.desktop,java.instrument,java.logging,java.management,java.management.rmi,java.naming,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml,jdk.httpserver,jdk.unsupported \
      --no-header-files \
@@ -10,6 +10,7 @@ RUN jlink \
      --output /opt/jre-21
 
 FROM debian:trixie-slim
+ARG TARGETPLATFORM
 MAINTAINER CYOSP <cyosp@cyosp.com>
 
 RUN apt update && apt upgrade -y
@@ -26,5 +27,5 @@ RUN apt install -y bc imagemagick ffmpeg
 ADD docker-context/generateAlternativeFormats.sh /generateAlternativeFormats.sh
 RUN chmod +x /generateAlternativeFormats.sh
 
-ADD docker-context/ids-*.jar /ids.jar
+ADD docker-context/$TARGETPLATFORM/ids-*.jar /ids.jar
 CMD java -jar /ids.jar

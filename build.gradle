@@ -3,8 +3,9 @@ buildscript {
         mavenCentral()
     }
     ext {
-        springBootVersion = "2.3.1.RELEASE"
+        springBootVersion = "2.7.18"
         idsBackendVersion = "0.0.0"
+        javacppVersion = "1.5.10"
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
@@ -15,12 +16,18 @@ plugins {
     id "java"
     id 'java-library-distribution'
     id "org.springframework.boot" version "${springBootVersion}"
-    id "io.spring.dependency-management" version "1.0.9.RELEASE"
-    id 'com.palantir.docker' version "0.25.0"
+    id "io.spring.dependency-management" version "1.1.7"
+    id 'org.bytedeco.gradle-javacpp-platform' version "${javacppVersion}"
+    id 'com.palantir.docker' version "0.36.0"
 }
 
 version = "${idsBackendVersion}"
-sourceCompatibility = "1.11"
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
 
 repositories {
     mavenCentral()
@@ -28,7 +35,7 @@ repositories {
 
 dependencies {
     ext {
-        lombokVersion = "1.18.12"
+        lombokVersion = "1.18.38"
         junitVersion = "5.6.2"
         mockitoVersion = "3.4.3"
         jsonwebtokenVersion = "0.11.0"
@@ -54,8 +61,8 @@ dependencies {
     implementation "org.apache.commons:commons-csv:1.8"
     implementation "com.drewnoakes:metadata-extractor:2.19.0"
     implementation "com.twelvemonkeys.imageio:imageio-jpeg:3.11.0" // JPEGSegment: image metadata
-    implementation "org.bytedeco:javacv-platform:1.5.12" // FFmpegFrameGrabber: video -> image
-    implementation "ws.schild:jave-all-deps:3.5.0" // Encoder: video -> video
+    implementation "org.bytedeco:javacv-platform:${javacppVersion}" // FFmpegFrameGrabber: video -> image
+    implementation "ws.schild:jave-core:3.5.0" // Encoder: video -> video
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-params:${junitVersion}"
