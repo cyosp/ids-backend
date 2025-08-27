@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim as java-runtime
+FROM debian:trixie-slim AS java-runtime
 RUN apt update && apt upgrade -y
 RUN apt install -y openjdk-11-jdk-headless
 RUN jlink \
@@ -9,7 +9,7 @@ RUN jlink \
      --no-man-pages \
      --output /opt/jre-11
 
-FROM debian:bullseye-slim
+FROM debian:trixie-slim
 MAINTAINER CYOSP <cyosp@cyosp.com>
 
 RUN apt update && apt upgrade -y
