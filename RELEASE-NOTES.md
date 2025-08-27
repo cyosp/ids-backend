@@ -1,5 +1,10 @@
 Release notes
 -------------
+##### 9.0.0 (2025-08-27)
+ * Add video support - Breaking changes: configuration and HTTP calls
+ * Fix: Preview image generation
+ * `generateAlternativeFormats.sh` updated for ImageMagick v7
+
 ##### 8.4.0 (2024-08-17)
  * Extract taken date from Exif IFD0 group
 
