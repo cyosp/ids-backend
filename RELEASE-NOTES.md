@@ -1,5 +1,10 @@
 Release notes
 -------------
+##### 9.1.0 (2025-09-13)
+ * Add fragmented preview video generation
+ * Fix: Java preview video generation
+ * Fix: Error when there is no bearer token in HTTP requests
+
 ##### 9.0.0 (2025-08-27)
  * Add video support - Breaking changes: configuration and HTTP calls
  * Fix: Preview image generation
