@@ -17,17 +17,13 @@ import com.cyosp.ids.service.SecurityService;
 import graphql.schema.DataFetcher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.stereotype.Component;
-import ws.schild.jave.Encoder;
-import ws.schild.jave.MultimediaObject;
-import ws.schild.jave.encode.AudioAttributes;
-import ws.schild.jave.encode.EncodingAttributes;
-import ws.schild.jave.encode.VideoAttributes;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageWriteParam;
@@ -157,18 +153,19 @@ public class MutationDataFetcher {
     }
 
     private void createPreviewVideo(Video source, File output) {
+        String ffmpeg = Loader.load(org.bytedeco.ffmpeg.ffmpeg.class);
+        ProcessBuilder processBuilder = new ProcessBuilder(ffmpeg, "-i", source.getFile().getAbsolutePath(),
+                // frag_keyframe: start a new fragment at each video keyframe
+                // empty_moov: cause output to be 100% fragmented
+                // default_base_moof: avoids writing the absolute base_data_offset field in tfhd atoms
+                "-movflags", "frag_keyframe+empty_moov+default_base_moof",
+                "-acodec", "mp3",
+                "-ab", "128k",
+                "-vcodec", "h264",
+                "-b:v", "1200k",
+                output.getAbsolutePath());
         try {
-            AudioAttributes audioAttributes = new AudioAttributes();
-            audioAttributes.setCodec("libmp3lame");
-            audioAttributes.setBitRate(180_000);
-            VideoAttributes videoAttributes = new VideoAttributes();
-            videoAttributes.setCodec("libx264"); // 2025-08-19: mpeg4 coded is not supported by Firefox
-            videoAttributes.setBitRate(1_200_000);
-            EncodingAttributes encodingAttributes = new EncodingAttributes();
-            encodingAttributes.setOutputFormat("mp4");
-            encodingAttributes.setAudioAttributes(audioAttributes);
-            encodingAttributes.setVideoAttributes(videoAttributes);
-            new Encoder().encode(new MultimediaObject(source.getFile()), output, encodingAttributes);
+            processBuilder.inheritIO().start().waitFor();
         } catch (Exception e) {
             log.error("Fail to create preview video: {}", e.getMessage());
             throw new RuntimeException(e);

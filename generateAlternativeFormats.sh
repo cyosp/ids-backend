@@ -82,7 +82,7 @@ createPreviewVideo() {
   local PREVIEW_FILE="$IDS_DIR/$MEDIA_BASE_NAME$PREVIEW_VIDEO_SUFFIX"
   if [ ! -e "$PREVIEW_FILE" ]; then
     echo "Start preview generation"
-    ffmpeg -hide_banner -loglevel error -i "$file" -acodec mp3 -ab 128k -vcodec h264 -b:v 1200k "$PREVIEW_FILE"
+    ffmpeg -hide_banner -loglevel error -i "$file" -movflags frag_keyframe+empty_moov+default_base_moof -acodec mp3 -ab 128k -vcodec h264 -b:v 1200k "$PREVIEW_FILE"
     echo "Done"
   else
     echo "Preview already exists"
