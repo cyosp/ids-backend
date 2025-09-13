@@ -50,7 +50,7 @@ dependencies {
     implementation "com.google.guava:guava:29.0-jre"
     implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
     implementation "org.tomlj:tomlj:1.0.0"
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.11.1"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.12.7.2"
     implementation "org.springframework.boot:spring-boot-starter-security:1.5.9.RELEASE"
     implementation "io.jsonwebtoken:jjwt-api:${jsonwebtokenVersion}"
     implementation "io.jsonwebtoken:jjwt-impl:${jsonwebtokenVersion}"
