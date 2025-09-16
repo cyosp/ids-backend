@@ -37,7 +37,8 @@ public class ModelService {
     }
 
     public boolean isImage(Path path) {
-        return lowerCaseExtension(path).endsWith(".jpg");
+        String lowerCaseExtension = lowerCaseExtension(path);
+        return lowerCaseExtension.endsWith(".jpg") || lowerCaseExtension.endsWith(".jpeg");
     }
 
     public boolean isVideo(Path path) {
