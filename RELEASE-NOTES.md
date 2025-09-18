@@ -1,5 +1,9 @@
 Release notes
 -------------
+##### 10.0.0 (2025-09-18)
+ * Move preview video from MP4 to WebM - Breaking change: preview video format
+ * Add .jpeg as supported image extension
+
 ##### 9.1.0 (2025-09-13)
  * Add fragmented preview video generation
  * Fix: Java preview video generation
