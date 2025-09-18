@@ -5,7 +5,7 @@ THUMBNAIL_SQUARE_SIZE=200
 
 IDS_DIR=".ids"
 PREVIEW_SUFFIX=".preview.jpg"
-PREVIEW_VIDEO_SUFFIX=".preview.mp4"
+PREVIEW_VIDEO_SUFFIX=".preview.webm"
 THUMBNAIL_SUFFIX=".thumbnail.jpg"
 
 createThumbnailImage() {
@@ -82,7 +82,7 @@ createPreviewVideo() {
   local PREVIEW_FILE="$IDS_DIR/$MEDIA_BASE_NAME$PREVIEW_VIDEO_SUFFIX"
   if [ ! -e "$PREVIEW_FILE" ]; then
     echo "Start preview generation"
-    ffmpeg -hide_banner -loglevel error -i "$file" -movflags frag_keyframe+empty_moov+default_base_moof -acodec mp3 -ab 128k -vcodec h264 -b:v 1200k "$PREVIEW_FILE"
+        ffmpeg -hide_banner -loglevel error -i "$file" -c:v libvpx-vp9 -b:v 1200k -c:a libvorbis -ab 128k "$PREVIEW_FILE"
     echo "Done"
   else
     echo "Preview already exists"

@@ -155,14 +155,10 @@ public class MutationDataFetcher {
     private void createPreviewVideo(Video source, File output) {
         String ffmpeg = Loader.load(org.bytedeco.ffmpeg.ffmpeg.class);
         ProcessBuilder processBuilder = new ProcessBuilder(ffmpeg, "-i", source.getFile().getAbsolutePath(),
-                // frag_keyframe: start a new fragment at each video keyframe
-                // empty_moov: cause output to be 100% fragmented
-                // default_base_moof: avoids writing the absolute base_data_offset field in tfhd atoms
-                "-movflags", "frag_keyframe+empty_moov+default_base_moof",
-                "-acodec", "mp3",
-                "-ab", "128k",
-                "-vcodec", "h264",
+                "-c:v", "libvpx-vp9",
                 "-b:v", "1200k",
+                "-c:a", "libvorbis",
+                "-ab", "128k",
                 output.getAbsolutePath());
         try {
             processBuilder.inheritIO().start().waitFor();

@@ -20,7 +20,7 @@ public class Video extends Media {
 
     @Override
     protected String getPreviewExtension() {
-        return ".mp4"; // Could be .webm
+        return ".webm";
     }
 
     @Override
