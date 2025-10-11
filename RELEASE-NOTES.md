@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 11.0.0 (2025-10-11)
+ * Move preview video from WebM to HLS - Breaking change: preview video format
+
 ##### 10.0.0 (2025-09-18)
  * Move preview video from MP4 to WebM - Breaking change: preview video format
  * Add .jpeg as supported image extension
