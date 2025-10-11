@@ -159,11 +159,11 @@ public class MutationDataFetcher {
                 "-a:b", "128k",
                 "-ac", "2",
                 "-c:v", "libx264",
-                "-crf", "23",
+                "-crf", "25",
                 "-profile:v", "baseline",
                 "-level", "3.0",
                 "-pix_fmt", "yuv420p",
-                "-hls_time", "2",
+                "-hls_time", "10",
                 "-hls_list_size", "0",
                 "-f", "hls",
                 output.getAbsolutePath());
