@@ -42,7 +42,8 @@ public class ModelService {
     }
 
     public boolean isVideo(Path path) {
-        return lowerCaseExtension(path).endsWith(".mov");
+        String lowerCaseExtension = lowerCaseExtension(path);
+        return lowerCaseExtension.endsWith(".mov") || lowerCaseExtension.endsWith(".mp4");
     }
 
     public boolean isMedia(Path path) {

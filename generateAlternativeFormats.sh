@@ -113,7 +113,7 @@ generateAlternateFormats() {
       IMAGE_EXTENSION_LOWER_CASE=$(echo ${file##*.} | tr '[:upper:]' '[:lower:]')
       if [ "$IMAGE_EXTENSION_LOWER_CASE" = "jpg" ] || [ "$IMAGE_EXTENSION_LOWER_CASE" = "jpeg" ]; then
         createAlternateImageFormats
-      elif [ "$IMAGE_EXTENSION_LOWER_CASE" = "mov" ]; then
+      elif [ "$IMAGE_EXTENSION_LOWER_CASE" = "mov" ] || [ "$IMAGE_EXTENSION_LOWER_CASE" = "mp4" ]; then
         createAlternateVideoFormats
       fi
     fi
