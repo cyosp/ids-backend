@@ -19,7 +19,7 @@ public class Image extends Media {
     }
 
     @Override
-    protected String getPreviewExtension() {
+    public String getPreviewExtension() {
         return ".jpg";
     }
 

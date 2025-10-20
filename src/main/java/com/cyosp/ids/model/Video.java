@@ -19,7 +19,7 @@ public class Video extends Media {
     }
 
     @Override
-    protected String getPreviewExtension() {
+    public String getPreviewExtension() {
         return ".m3u8";
     }
 

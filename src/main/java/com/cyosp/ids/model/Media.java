@@ -38,7 +38,7 @@ public abstract class Media extends FileSystemElement {
         return getUrlPathPrefix(this.getClass());
     }
 
-    protected abstract String getPreviewExtension();
+    public abstract String getPreviewExtension();
 
     protected abstract String getThumbnailExtension();
 

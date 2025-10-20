@@ -33,6 +33,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +51,7 @@ import static java.lang.String.format;
 import static java.nio.file.Files.copy;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.delete;
+import static java.nio.file.Files.newDirectoryStream;
 import static java.nio.file.Paths.get;
 import static java.util.Optional.empty;
 import static javax.imageio.ImageIO.createImageOutputStream;
@@ -271,22 +274,40 @@ public class MutationDataFetcher {
         };
     }
 
+    private void deleteFiles(Path directory, String prefix) {
+        try (DirectoryStream<Path> files = newDirectoryStream(directory, prefix)) {
+            for (Path file : files) {
+                log.info("Delete: {}", file);
+                delete(file);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void deletePreview(Media media) {
+        File previewFile = media.getPreviewFile();
+        String previewFileName = previewFile.getName();
+        deleteFiles(previewFile.getParentFile().toPath(),
+                previewFileName.substring(0, previewFileName.lastIndexOf(media.getPreviewExtension())) + "*");
+    }
+
     public DataFetcher<Media> deleteMedia() {
         return dataFetchingEnvironment -> {
             securityService.checkAdministratorUser();
 
             Media media = modelService.getMedia(dataFetchingEnvironment);
-            deleteMedia(media.getThumbnailFile(), false);
-            deleteMedia(media.getPreviewFile(), false);
-            deleteMedia(media.getFile(), true);
+            deleteFile(media.getThumbnailFile(), false);
+            deletePreview(media);
+            deleteFile(media.getFile(), true);
 
             return media;
         };
     }
 
-    private void deleteMedia(File media, boolean mediaMustExist) throws IOException {
+    private void deleteFile(File media, boolean mediaMustExist) throws IOException {
         String mediaAbsolutePath = media.getAbsolutePath();
-        log.info("Media to delete: {}", mediaAbsolutePath);
+        log.info("File to delete: {}", mediaAbsolutePath);
 
         if (media.exists()) {
             delete(media.toPath());
@@ -295,7 +316,7 @@ public class MutationDataFetcher {
                     .replace(idsConfiguration.getAbsoluteMediasDirectory() + separator, "");
             throw new MediaDoesntExistException(mediaId);
         } else {
-            log.info("Image doesn't exist");
+            log.info("File doesn't exist");
         }
     }
 
