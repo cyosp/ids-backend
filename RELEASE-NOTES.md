@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 11.1.1 (2025-10-21)
+ * Fix: Delete only main preview video file
+
 ##### 11.1.0 (2025-10-16)
  * Add .mp4 as supported video extension
 
