@@ -1,9 +1,6 @@
 name: Release Jar and Docker image
 
-on:
-  push:
-    tags:
-      - '*'
+on: push
 
 jobs:
   build:
@@ -14,25 +11,15 @@ jobs:
         include:
           - arch: none
             distro: none
-            base_image: debian:trixie
-            docker_platform: linux/amd64
-            arch_id: linux_amd64
-          - arch: none
-            distro: none
             base_image: --platform=linux/arm arm32v7/debian:trixie
             docker_platform: linux/arm/v7
             arch_id: linux_arm_v7
-          - arch: none
-            distro: none
-            base_image: --platform=linux/arm64 arm64v8/debian:trixie
-            docker_platform: linux/arm/v8
-            arch_id: linux_arm_v8
     steps:
       - uses: actions/checkout@v3.5.3
 
       - name: Get tag name
         id: tag
-        run: echo "NAME=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
+        run: echo "NAME=testing" >> $GITHUB_OUTPUT
 
       - name: Use tag name as IDS backend version and Docker tag name
         uses: jacobtomlinson/gha-find-replace@0.1.2
@@ -70,19 +57,10 @@ jobs:
     steps:
       - name: Get tag name
         id: tag
-        run: echo "NAME=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
+        run: echo "NAME=testing" >> $GITHUB_OUTPUT
 
       - name: Checkout code
         uses: actions/checkout@v2.3.4
-
-      - name: Download artifact linux_amd64
-        uses: actions/download-artifact@v4.1.8
-        with:
-          name: linux_amd64
-          path: build/libs/linux/amd64
-
-      - name: find build/libs
-        run: find build/libs
 
       - name: Download artifact linux/arm/v7
         uses: actions/download-artifact@v4.1.8
@@ -90,16 +68,13 @@ jobs:
           name: linux_arm_v7
           path: build/libs/linux/arm/v7
 
-      - name: Download artifact linux/arm/v8
-        uses: actions/download-artifact@v4.1.8
-        with:
-          name: linux_arm_v8
-          path: build/libs/linux/arm/v8
+      - name: find build/libs
+        run: find build/libs
 
       - name: Setup Docker QEMU
         uses: docker/setup-qemu-action@v1.2.0
         with:
-          platforms: linux/amd64,linux/arm/v7,linux/arm/v8
+          platforms: linux/arm/v7
 
       - name: Setup Docker Buildx
         id: buildx
@@ -120,82 +95,6 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           context: build/docker
           file: Dockerfile
-          platforms: linux/amd64,linux/arm/v7,linux/arm/v8
+          platforms: linux/arm/v7
           push: true
           tags: cyosp/${{ github.event.repository.name }}:${{ steps.tag.outputs.NAME }}
-
-      - name: Move amd64 JAR
-        run: mv linux/amd64/ids-backend-${{ steps.tag.outputs.NAME }}.jar ids-backend-${{ steps.tag.outputs.NAME }}-amd64.jar
-        working-directory: build/libs
-
-      - name: Move arm/v7 JAR
-        run: mv linux/arm/v7/ids-backend-${{ steps.tag.outputs.NAME }}.jar ids-backend-${{ steps.tag.outputs.NAME }}-armv7.jar
-        working-directory: build/libs
-
-      - name: Move arm/v8 JAR
-        run: mv linux/arm/v8/ids-backend-${{ steps.tag.outputs.NAME }}.jar ids-backend-${{ steps.tag.outputs.NAME }}-armv8.jar
-        working-directory: build/libs
-
-      - name: Create check sum file
-        run: sha512sum *.jar > ids-backend-SHA512.txt
-        working-directory: build/libs
-
-      - name: Create GitHub release
-        id: release
-        uses: actions/create-release@v1.1.4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ steps.tag.outputs.NAME }}
-          draft: true
-
-      - name: Upload amd64 Jar to release
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: build/libs/ids-backend-${{ steps.tag.outputs.NAME }}-amd64.jar
-          asset_name: ids-backend-${{ steps.tag.outputs.NAME }}-amd64.jar
-          asset_content_type: application/octet-stream
-
-      - name: Upload armv7 Jar to release
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: build/libs/ids-backend-${{ steps.tag.outputs.NAME }}-armv7.jar
-          asset_name: ids-backend-${{ steps.tag.outputs.NAME }}-armv7.jar
-          asset_content_type: application/octet-stream
-
-      - name: Upload armv8 Jar to release
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: build/libs/ids-backend-${{ steps.tag.outputs.NAME }}-armv8.jar
-          asset_name: ids-backend-${{ steps.tag.outputs.NAME }}-armv8.jar
-          asset_content_type: application/octet-stream
-
-      - name: Upload check sum file to release
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: build/libs/ids-backend-SHA512.txt
-          asset_name: ids-backend-SHA512.txt
-          asset_content_type: text/plain
-
-      - name: Publish release with notes
-        uses: cyosp/publish-release-with-notes@1.0.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          id: ${{ steps.release.outputs.id }}
-          version: ${{ steps.tag.outputs.NAME }}
-          notes: ${{ github.workspace }}/RELEASE-NOTES.md
-
