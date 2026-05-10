@@ -1,5 +1,11 @@
 Release notes
 -------------
+##### 12.0.0 (2026-05-10)
+ * Add home (relative gallery path) and group names to user
+ * Add guest user (and role) whose access is restricted via its home
+ * Remove stacktrace from logs when access is not allowed
+ * Directory access can be limited to a user (by its email login) or via a group name
+
 ##### 11.1.1 (2025-10-21)
  * Fix: Delete only main preview video file
 
