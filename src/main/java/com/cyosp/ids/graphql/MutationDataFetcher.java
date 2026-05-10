@@ -255,7 +255,7 @@ public class MutationDataFetcher {
 
     public DataFetcher<User> changePassword() {
         return dataFetchingEnvironment -> {
-            if (idsConfiguration.isPasswordChangeAllowed()) {
+            if (!securityService.isGuestUser() && idsConfiguration.isPasswordChangeAllowed()) {
                 String password = dataFetchingEnvironment.getArgument(PASSWORD);
                 authenticateTokenizedUserWith(password);
 

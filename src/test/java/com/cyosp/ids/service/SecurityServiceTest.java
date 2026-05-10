@@ -2,6 +2,9 @@ package com.cyosp.ids.service;
 
 import com.cyosp.ids.configuration.IdsConfiguration;
 import com.cyosp.ids.model.Directory;
+import com.cyosp.ids.model.Group;
+import com.cyosp.ids.model.User;
+import com.cyosp.ids.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,8 +39,12 @@ import static org.springframework.util.FileSystemUtils.deleteRecursively;
 
 @ExtendWith(MockitoExtension.class)
 class SecurityServiceTest {
+    private static final String A_ROLE = "ROLE";
+
     @Mock
     private IdsConfiguration idsConfiguration;
+    @Mock
+    private UserRepository userRepository;
 
     private SecurityService securityService;
 
@@ -47,7 +54,7 @@ class SecurityServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        securityService = spy(new SecurityService(idsConfiguration));
+        securityService = spy(new SecurityService(idsConfiguration, userRepository, new ModelService(idsConfiguration)));
         authenticationTestService = new AuthenticationTestService();
     }
 
@@ -69,14 +76,14 @@ class SecurityServiceTest {
 
     @Test
     void hasAuthentication_yes() {
-        authenticationTestService.setAuthenticatedUser("login#0");
+        authenticationTestService.setAuthenticatedUser("login#0", A_ROLE);
 
         assertTrue(securityService.hasAuthentication());
     }
 
     @Test
     void isAnonymousUser_no() {
-        authenticationTestService.setAuthenticatedUser("login#1");
+        authenticationTestService.setAuthenticatedUser("login#1", A_ROLE);
 
         assertFalse(securityService.isAnonymousUser());
     }
@@ -86,6 +93,13 @@ class SecurityServiceTest {
         authenticationTestService.setAnonymousUser();
 
         assertTrue(securityService.isAnonymousUser());
+    }
+
+    @Test
+    void isGuestUser() {
+        authenticationTestService.setAuthenticatedUser("123456", "GUEST");
+
+        assertTrue(securityService.isGuestUser());
     }
 
     @ParameterizedTest
@@ -114,24 +128,24 @@ class SecurityServiceTest {
     }
 
     @Test
-    void getDirectoryPaths_null() {
-        List<String> directories = securityService.getDirectoryPaths(null);
+    void getPaths_null() {
+        List<String> directories = securityService.getPaths(null);
 
         assertEquals(1, directories.size());
         assertEquals("", directories.get(0));
     }
 
     @Test
-    void getDirectoryPaths_empty() {
-        List<String> directories = securityService.getDirectoryPaths("");
+    void getPaths_empty() {
+        List<String> directories = securityService.getPaths("");
 
         assertEquals(1, directories.size());
         assertEquals("", directories.get(0));
     }
 
     @Test
-    void getDirectoryPaths() {
-        List<String> directories = securityService.getDirectoryPaths("a/b/c");
+    void getPaths() {
+        List<String> directories = securityService.getPaths("a/b/c");
 
         assertEquals(asList("a", "a/b", "a/b/c"), directories);
     }
@@ -154,6 +168,13 @@ class SecurityServiceTest {
         doReturn(true)
                 .when(securityService)
                 .needAccessCheck();
+        String login = "lo@in.in";
+        User user = User.builder()
+                .email(login)
+                .build();
+        doReturn(user)
+                .when(userRepository)
+                .getByEmail(login);
 
         String tmpdir = getProperty("java.io.tmpdir");
         doReturn(tmpdir)
@@ -166,16 +187,102 @@ class SecurityServiceTest {
         String idsHiddenDirectory = temporaryBaseDirectory + separator + ".ids";
         createDirectories(get(idsHiddenDirectory));
 
-        String login = "login#2";
+
         if (createDeniedFile && !new File(idsHiddenDirectory + separator + "access.denied." + login).createNewFile()) {
             throw new RuntimeException("Fail to create access denied file");
         }
 
         doReturn(of(rootDirectory))
                 .when(securityService)
-                .getDirectoryPaths(rootDirectory);
+                .getPaths(rootDirectory);
 
-        authenticationTestService.setAuthenticatedUser(login);
+        authenticationTestService.setAuthenticatedUser(login, A_ROLE);
+
+        assertEquals(expectedIsAccessAllowed, securityService.isAccessAllowed(rootDirectory));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "ids-backend.root,true",
+            "non-user-home-dir,false",
+    })
+    void isAccessAllowed_guestUser(String userHome, boolean expectedIsAccessAllowed) {
+        doReturn(true)
+                .when(securityService)
+                .needAccessCheck();
+
+        String guestLogin = "guestLogin";
+        authenticationTestService.setAuthenticatedUser(guestLogin, "GUEST");
+
+        String rootDirectory = "ids-backend.root";
+        temporaryBaseDirectory = new File(getProperty("java.io.tmpdir") + separator + rootDirectory);
+
+        User user = User.builder()
+                .email(guestLogin)
+                .home(userHome)
+                .build();
+        doReturn(user)
+                .when(userRepository)
+                .getByEmail(guestLogin);
+
+        doReturn(true)
+                .when(securityService)
+                .isGuestUser();
+
+        assertEquals(expectedIsAccessAllowed, securityService.isAccessAllowed(rootDirectory));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "false,a-login,,true",
+            "true,a-login,,false",
+            "true,a-login,a-group,false",
+            "true,a-login,group-name,true",
+            "true,login,a-group,true",
+            "true,login,group-name,true",
+    })
+    void isAccessAllowed_limitedAccess(boolean createLimitedAccessFile, String userLogin, String userGroupName, boolean expectedIsAccessAllowed) throws IOException {
+        doReturn(true)
+                .when(securityService)
+                .needAccessCheck();
+
+        authenticationTestService.setAuthenticatedUser(userLogin, A_ROLE);
+
+        String tmpdir = getProperty("java.io.tmpdir");
+        String rootDirectory = "ids-backend.root";
+        temporaryBaseDirectory = new File(tmpdir + separator + rootDirectory);
+
+        doReturn(of(rootDirectory))
+                .when(securityService)
+                .getPaths(rootDirectory);
+
+        User user = User.builder()
+                .email(userLogin)
+                .groups(of(Group.builder()
+                        .name(userGroupName)
+                        .build()))
+                .build();
+        doReturn(user)
+                .when(userRepository)
+                .getByEmail(userLogin);
+
+        doReturn(false)
+                .when(securityService)
+                .isGuestUser();
+
+        doReturn(tmpdir)
+                .when(idsConfiguration)
+                .getAbsoluteMediasDirectory();
+
+        String idsHiddenDirectory = temporaryBaseDirectory + separator + ".ids";
+        createDirectories(get(idsHiddenDirectory));
+
+        if (createLimitedAccessFile && !new File(idsHiddenDirectory + separator + "access.limited.user.name.login").createNewFile()) {
+            throw new RuntimeException("Fail to create access limited file");
+        }
+        if (createLimitedAccessFile && !new File(idsHiddenDirectory + separator + "access.limited.group.name.group-name").createNewFile()) {
+            throw new RuntimeException("Fail to create access limited file");
+        }
 
         assertEquals(expectedIsAccessAllowed, securityService.isAccessAllowed(rootDirectory));
     }
@@ -212,7 +319,7 @@ class SecurityServiceTest {
                 .when(securityService)
                 .isAccessAllowed(fileSystemElementId);
 
-        authenticationTestService.setAuthenticatedUser("login#3");
+        authenticationTestService.setAuthenticatedUser("login#3", A_ROLE);
 
         assertThrows(AccessDeniedException.class, () -> securityService.checkAccessAllowed(fileSystemElementId));
     }

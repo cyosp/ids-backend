@@ -18,8 +18,8 @@ public class AuthenticationTestService {
         getContext().setAuthentication(new AnonymousAuthenticationToken("a_key", principal, grantedAuthorities));
     }
 
-    public void setAuthenticatedUser(String login) {
-        Collection<GrantedAuthority> grantedAuthorities = of(new SimpleGrantedAuthority("ROLE"));
+    public void setAuthenticatedUser(String login, String role) {
+        Collection<GrantedAuthority> grantedAuthorities = of(new SimpleGrantedAuthority(role));
         User principal = new User(login, "password", grantedAuthorities);
         getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal, null, grantedAuthorities));
     }

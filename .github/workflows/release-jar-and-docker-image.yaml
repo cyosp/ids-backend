@@ -191,7 +191,7 @@ jobs:
           asset_content_type: text/plain
 
       - name: Publish release with notes
-        uses: cyosp/publish-release-with-notes@1.0.0
+        uses: cyosp/publish-release-with-notes@2.0.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

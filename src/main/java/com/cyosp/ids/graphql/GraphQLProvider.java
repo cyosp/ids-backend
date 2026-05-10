@@ -8,6 +8,8 @@ import com.cyosp.ids.model.Metadata;
 import com.cyosp.ids.model.Video;
 import com.google.common.io.Resources;
 import graphql.GraphQL;
+import graphql.execution.AsyncExecutionStrategy;
+import graphql.execution.ExecutionStrategy;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.TypeResolver;
 import graphql.schema.idl.RuntimeWiring;
@@ -20,7 +22,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.net.URL;
 
 import static com.google.common.io.Resources.getResource;
 import static graphql.GraphQL.newGraphQL;
@@ -51,10 +52,13 @@ public class GraphQLProvider {
 
     @PostConstruct
     public void init() throws IOException {
-        URL url = getResource("schema.graphqls");
-        String sdl = Resources.toString(url, UTF_8);
-        GraphQLSchema graphQLSchema = buildSchema(sdl);
-        graphQL = newGraphQL(graphQLSchema).build();
+        GraphQLSchema graphQLSchema = buildSchema(Resources.toString(getResource("schema.graphqls"), UTF_8));
+        ExecutionStrategy executionStrategy = new AsyncExecutionStrategy(new CustomDataFetcherExceptionHandler());
+
+        graphQL = newGraphQL(graphQLSchema)
+                .queryExecutionStrategy(executionStrategy)
+                .mutationExecutionStrategy(executionStrategy)
+                .build();
     }
 
     TypeResolver fileSystemElementTypeResolver = typeResolutionEnvironment -> {

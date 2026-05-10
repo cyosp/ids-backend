@@ -24,6 +24,8 @@ import static org.mockito.Mockito.spy;
 
 @ExtendWith(MockitoExtension.class)
 class IdsConfigurationTest {
+    public static final String ROLE = "ROLE";
+
     @Mock
     private TomlParseResult tomlParseResult;
 
@@ -89,7 +91,7 @@ class IdsConfigurationTest {
 
     @Test
     void isPasswordChangeAllowed_isGeneralPasswordChangeAllowedIsTrue_userNotInList() {
-        authenticationTestService.setAuthenticatedUser("an@authenticated.user");
+        authenticationTestService.setAuthenticatedUser("an@authenticated.user", ROLE);
 
         doReturn(true)
                 .when(idsConfiguration)
@@ -110,7 +112,7 @@ class IdsConfigurationTest {
     @Test
     void isPasswordChangeAllowed_isGeneralPasswordChangeAllowedIsTrue_userDenied() {
         String login = "a@denied.user";
-        authenticationTestService.setAuthenticatedUser(login);
+        authenticationTestService.setAuthenticatedUser(login, ROLE);
 
         doReturn(true)
                 .when(idsConfiguration)

@@ -39,7 +39,6 @@ public class FileSystemElementService {
     private final StopWatch stopWatch = new StopWatch();
     private final IdsConfiguration idsConfiguration;
     private final ModelService modelService;
-    private final SecurityService securityService;
 
     private final Map<String, Media> previewDirectoryNaturalOrderMap = new HashMap<>();
     private final Map<String, Media> previewDirectoryReversedOrderMap = new HashMap<>();
@@ -139,7 +138,6 @@ public class FileSystemElementService {
         unorderedPaths.stream()
                 .filter(modelService::isDirectory)
                 .map(modelService::directoryFrom)
-                .filter(securityService::isAccessAllowed)
                 .sorted(directoryReversedOrder ? byName().reversed() : byName())
                 .forEach(directory -> {
                     Media preview = null;
@@ -166,7 +164,6 @@ public class FileSystemElementService {
         unorderedPaths.stream()
                 .filter(modelService::isMedia)
                 .map(modelService::mediaFrom)
-                .filter(securityService::isAccessAllowed)
                 .sorted(byName())
                 .forEach(fileSystemElements::add);
 
