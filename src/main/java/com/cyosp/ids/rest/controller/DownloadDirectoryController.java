@@ -34,7 +34,7 @@ import static org.apache.tomcat.util.http.fileupload.IOUtils.copy;
 @RequiredArgsConstructor
 @RequestMapping(value = DownloadDirectoryController.DOWNLOAD_PATH, produces = "application/zip")
 public class DownloadDirectoryController {
-    static final String DOWNLOAD_PATH = "/download";
+    static final String DOWNLOAD_PATH = "/download/";
 
     private final IdsConfiguration idsConfiguration;
     private final ModelService modelService;

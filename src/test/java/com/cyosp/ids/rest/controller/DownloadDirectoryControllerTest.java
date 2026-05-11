@@ -42,7 +42,7 @@ class DownloadDirectoryControllerTest {
 
         doThrow(AccessDeniedException.class)
                 .when(securityService)
-                .checkAccessAllowed("/00 - 000/01 - 001/02 - 002/03 - 003/04 - 004");
+                .checkAccessAllowed("00 - 000/01 - 001/02 - 002/03 - 003/04 - 004");
 
         assertThrows(AccessDeniedException.class, () -> downloadDirectoryController.download(request, response));
     }
