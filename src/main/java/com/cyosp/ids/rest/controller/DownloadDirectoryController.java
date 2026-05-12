@@ -14,11 +14,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static com.cyosp.ids.model.Directory.IDS_HIDDEN_DIRECTORY;
 import static java.io.File.separator;
 import static java.net.URLDecoder.decode;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -58,19 +61,33 @@ public class DownloadDirectoryController {
             throw new IllegalStateException("Path doesn't match an existing directory: " + fullPath);
         }
 
-        try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream());
-             DirectoryStream<Path> paths = newDirectoryStream(absoluteDirectoryPath, modelService::isMedia)) {
-            response.setStatus(SC_OK);
-            for (Path path : paths) {
-                File file = path.toFile();
-                zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
-                FileInputStream fileInputStream = new FileInputStream(file);
-                copy(fileInputStream, zipOutputStream);
-                fileInputStream.close();
+        response.setStatus(SC_OK);
+
+        Path zipFile = get(absoluteDirectoryPath.toFile().getAbsolutePath(),
+                separator, IDS_HIDDEN_DIRECTORY,
+                separator, "ids.zip");
+        if (exists(zipFile)) {
+            log.info("Use existing zip file");
+            try (OutputStream outputStream = response.getOutputStream()) {
+                Files.copy(zipFile, outputStream);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-            zipOutputStream.closeEntry();
-        } catch (IOException e) {
-            log.warn("Fail to list file system elements: " + e.getMessage());
+        } else {
+            log.info("Zip on demand");
+            try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream());
+                 DirectoryStream<Path> paths = newDirectoryStream(absoluteDirectoryPath, modelService::isMedia)) {
+                for (Path path : paths) {
+                    File file = path.toFile();
+                    zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
+                    FileInputStream fileInputStream = new FileInputStream(file);
+                    copy(fileInputStream, zipOutputStream);
+                    fileInputStream.close();
+                }
+                zipOutputStream.closeEntry();
+            } catch (IOException e) {
+                log.warn("Fail to list file system elements: " + e.getMessage());
+            }
         }
     }
 }
