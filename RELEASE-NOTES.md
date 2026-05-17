@@ -1,5 +1,9 @@
 Release notes
 -------------
+##### 12.1.0 (2026-05-17)
+ * Download directory feature can return an existing zip file
+ * Fix not working zip download
+
 ##### 12.0.0 (2026-05-10)
  * Add home (relative gallery path) and group names to user
  * Add guest user (and role) whose access is restricted via its home
