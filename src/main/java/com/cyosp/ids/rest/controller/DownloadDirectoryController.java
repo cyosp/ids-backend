@@ -58,7 +58,7 @@ public class DownloadDirectoryController {
 
         Path absoluteDirectoryPath = get(idsConfiguration.getAbsoluteMediasDirectory(), separator, directoryPath);
         if (!exists(absoluteDirectoryPath) || !isDirectory(absoluteDirectoryPath)) {
-            throw new IllegalStateException("Path doesn't match an existing directory: " + fullPath);
+            throw new IllegalStateException("Path doesn't match an existing directory: " + absoluteDirectoryPath);
         }
 
         response.setStatus(SC_OK);
@@ -70,6 +70,7 @@ public class DownloadDirectoryController {
             log.info("Use existing zip file");
             try (OutputStream outputStream = response.getOutputStream()) {
                 Files.copy(zipFile, outputStream);
+                log.info("Download ended");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -85,6 +86,7 @@ public class DownloadDirectoryController {
                     fileInputStream.close();
                 }
                 zipOutputStream.closeEntry();
+                log.info("Download ended");
             } catch (IOException e) {
                 log.warn("Fail to list file system elements: " + e.getMessage());
             }
