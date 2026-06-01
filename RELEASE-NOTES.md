@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 12.1.1 (2026-06-01)
+ * Add ZIP download ended log
+
 ##### 12.1.0 (2026-05-17)
  * Download directory feature can return an existing zip file
  * Fix not working zip download
