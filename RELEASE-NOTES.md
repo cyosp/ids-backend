@@ -1,5 +1,8 @@
 Release notes
 -------------
+##### 12.2.0 (2026-10-30)
+ * Build for linux/arm64/v8
+
 ##### 12.1.1 (2026-06-01)
  * Add ZIP download ended log
 
