@@ -25,8 +25,8 @@ jobs:
           - arch: none
             distro: none
             base_image: --platform=linux/arm64 arm64v8/debian:trixie
-            docker_platform: linux/arm/v8
-            arch_id: linux_arm_v8
+            docker_platform: linux/arm64
+            arch_id: linux_arm64
     steps:
       - uses: actions/checkout@v3.5.3
 
@@ -90,16 +90,16 @@ jobs:
           name: linux_arm_v7
           path: build/libs/linux/arm/v7
 
-      - name: Download artifact linux/arm/v8
+      - name: Download artifact linux/arm64
         uses: actions/download-artifact@v4.1.8
         with:
-          name: linux_arm_v8
-          path: build/libs/linux/arm/v8
+          name: linux_arm64
+          path: build/libs/linux/arm64
 
       - name: Setup Docker QEMU
         uses: docker/setup-qemu-action@v1.2.0
         with:
-          platforms: linux/amd64,linux/arm/v7,linux/arm/v8
+          platforms: linux/amd64,linux/arm/v7,linux/arm64
 
       - name: Setup Docker Buildx
         id: buildx
@@ -120,7 +120,7 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           context: build/docker
           file: Dockerfile
-          platforms: linux/amd64,linux/arm/v7,linux/arm/v8
+          platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
           tags: cyosp/${{ github.event.repository.name }}:${{ steps.tag.outputs.NAME }}
 
@@ -132,8 +132,8 @@ jobs:
         run: mv linux/arm/v7/ids-backend-${{ steps.tag.outputs.NAME }}.jar ids-backend-${{ steps.tag.outputs.NAME }}-armv7.jar
         working-directory: build/libs
 
-      - name: Move arm/v8 JAR
-        run: mv linux/arm/v8/ids-backend-${{ steps.tag.outputs.NAME }}.jar ids-backend-${{ steps.tag.outputs.NAME }}-armv8.jar
+      - name: Move arm64 JAR
+        run: mv linux/arm64/ids-backend-${{ steps.tag.outputs.NAME }}.jar ids-backend-${{ steps.tag.outputs.NAME }}-arm64.jar
         working-directory: build/libs
 
       - name: Create check sum file
@@ -170,14 +170,14 @@ jobs:
           asset_name: ids-backend-${{ steps.tag.outputs.NAME }}-armv7.jar
           asset_content_type: application/octet-stream
 
-      - name: Upload armv8 Jar to release
+      - name: Upload arm64 Jar to release
         uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: build/libs/ids-backend-${{ steps.tag.outputs.NAME }}-armv8.jar
-          asset_name: ids-backend-${{ steps.tag.outputs.NAME }}-armv8.jar
+          asset_path: build/libs/ids-backend-${{ steps.tag.outputs.NAME }}-arm64.jar
+          asset_name: ids-backend-${{ steps.tag.outputs.NAME }}-arm64.jar
           asset_content_type: application/octet-stream
 
       - name: Upload check sum file to release
